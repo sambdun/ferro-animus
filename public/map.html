@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Map — Ferro Animus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #f0d080;
+      --gold-dim: #5a4418;
+      --gold-mid: #8a6a28;
+      --bg-deep: #03030a;
+      --bg-dark: #070710;
+      --bg-panel: #0b0b18;
+      --bg-panel2: #0f0f1e;
+      --border: #1e1e3a;
+      --red: #b03020;
+      --red-glow: #ff5544;
+      --blue-glow: #4fc3f7;
+      --green: #1e8c50;
+      --green-glow: #3dff8a;
+      --purple-glow: #c084ff;
+      --text-dim: #55557a;
+      --text-mid: #9999bb;
+      --text: #ddddf0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Cinzel', serif;
+      overflow: hidden;
+    }
+
+    /* ── Top bar ── */
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 60px;
+      background: linear-gradient(180deg, rgba(7,7,16,0.98) 0%, rgba(7,7,16,0.90) 100%);
+      border-bottom: 1px solid var(--gold-dim);
+      display: flex; align-items: center; padding: 0 20px; gap: 20px;
+    }
+    #topbar a {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--gold); text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 0.08em;
+      opacity: 0.85; transition: opacity 0.2s;
+    }
+    #topbar a:hover { opacity: 1; }
+    #topbar a svg { flex-shrink: 0; }
+    #topbar .title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 16px; color: var(--gold-light);
+      letter-spacing: 0.12em; flex: 1; text-align: center;
+    }
+    #topbar .level-badge {
+      font-family: 'Cinzel', serif; font-size: 12px;
+      color: var(--gold); border: 1px solid var(--gold-dim);
+      padding: 4px 12px; letter-spacing: 0.1em;
+    }
+    .btn-logout {
+      background: transparent; border: 1px solid var(--gold-dim);
+      color: var(--text-mid); font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 2px; padding: 5px 12px;
+      cursor: pointer; transition: all 0.2s; margin-left: 12px;
+    }
+    .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Canvas ── */
+    #map-canvas {
+      position: fixed;
+      top: 60px; left: 0;
+      width: 100vw;
+      height: calc(100vh - 60px);
+      display: block; cursor: pointer;
+    }
+
+    /* ── Side drawer ── */
+    #drawer {
+      position: fixed; top: 60px; right: 0;
+      width: 340px; height: calc(100vh - 60px);
+      background: linear-gradient(180deg, rgba(11,11,24,0.98) 0%, rgba(7,7,16,0.98) 100%);
+      border-left: 1px solid var(--gold-dim);
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      z-index: 200; overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    #drawer.open { transform: translateX(0); }
+
+    #drawer-header {
+      padding: 20px 20px 12px;
+      border-bottom: 1px solid var(--gold-dim);
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    #drawer-header .region-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 18px; color: var(--gold-light);
+      line-height: 1.3;
+    }
+    #drawer-header .region-subtitle {
+      font-size: 10px; color: var(--gold-dim);
+      letter-spacing: 0.15em; margin-top: 3px; text-transform: uppercase;
+    }
+    #drawer-header .region-range {
+      font-size: 11px; color: var(--text-mid); margin-top: 4px;
+    }
+    #drawer-close {
+      background: none; border: 1px solid var(--gold-dim);
+      color: var(--gold); font-size: 18px; cursor: pointer;
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: border-color 0.2s, color 0.2s;
+    }
+    #drawer-close:hover { border-color: var(--gold); color: var(--gold-light); }
+
+    #drawer-body { padding: 16px 20px 24px; flex: 1; }
+
+    .drawer-divider {
+      border: none; border-top: 1px solid var(--gold-dim);
+      margin: 14px 0;
+    }
+
+    .drawer-section-label {
+      font-size: 9px; letter-spacing: 0.2em; color: var(--gold-mid);
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    .drawer-lore {
+      font-family: 'IM Fell English', serif;
+      font-style: italic; font-size: 13px;
+      color: var(--text-mid); line-height: 1.7;
+    }
+
+    /* locked state */
+    .drawer-locked {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 20px; text-align: center; gap: 14px;
+    }
+    .drawer-locked .lock-icon {
+      font-size: 48px; opacity: 0.4;
+    }
+    .drawer-locked .lock-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 14px; color: var(--text-dim);
+      letter-spacing: 0.15em;
+    }
+    .drawer-locked .lock-msg {
+      font-size: 12px; color: var(--text-dim);
+    }
+    .drawer-locked .lock-level {
+      font-size: 11px; color: var(--gold-dim);
+      border: 1px solid var(--gold-dim);
+      padding: 4px 12px; letter-spacing: 0.1em;
+    }
+
+    /* Boss section */
+    .boss-card {
+      background: rgba(15,15,30,0.8);
+      border: 1px solid var(--border);
+      padding: 12px 14px; margin-bottom: 10px;
+    }
+    .boss-name {
+      font-size: 12px; letter-spacing: 0.1em;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .boss-status-none { font-size: 11px; color: var(--text-dim); font-style: italic; }
+    .boss-status-active { font-size: 11px; color: var(--gold); }
+    .boss-status-done { font-size: 11px; color: var(--green-glow); text-decoration: line-through; }
+    .boss-status-notstarted { font-size: 11px; color: var(--red-glow); }
+
+    .hp-bar-wrap {
+      margin-top: 8px; background: rgba(5,5,10,0.9);
+      border: 1px solid var(--gold-dim); height: 10px; position: relative; overflow: hidden;
+    }
+    .hp-bar-fill {
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim) 0%, var(--gold) 60%, var(--gold-light) 100%);
+      animation: hp-shimmer 2s linear infinite;
+    }
+    @keyframes hp-shimmer {
+      0%   { filter: brightness(1); }
+      50%  { filter: brightness(1.3); }
+      100% { filter: brightness(1); }
+    }
+
+    /* Gear cards */
+    .gear-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .gear-card {
+      flex: 1; padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: rgba(15,15,30,0.6);
+      position: relative; text-align: center;
+    }
+    .gear-card.unlocked { border-color: var(--gold-dim); }
+    .gear-card.locked { filter: brightness(0.5); }
+    .gear-card .gear-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+    .gear-card .gear-name {
+      font-size: 10px; letter-spacing: 0.08em;
+      color: var(--gold); line-height: 1.3;
+    }
+    .gear-card .gear-type {
+      font-size: 9px; color: var(--text-dim);
+      margin-top: 2px; letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .gear-card .gear-lock-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; background: rgba(3,3,10,0.5);
+    }
+
+    /* Quest list */
+    .quest-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid rgba(30,30,58,0.5);
+    }
+    .quest-item:last-child { border-bottom: none; }
+    .quest-name { font-size: 11px; color: var(--text-mid); flex: 1; line-height: 1.4; }
+    .quest-xp { font-size: 10px; color: var(--gold-mid); white-space: nowrap; margin-top: 1px; }
+    .quest-badge {
+      font-size: 9px; letter-spacing: 0.08em; padding: 2px 6px;
+      white-space: nowrap; margin-top: 1px;
+    }
+    .quest-badge.active { background: rgba(180,110,20,0.2); color: var(--gold); border: 1px solid var(--gold-dim); }
+    .quest-badge.completed { background: rgba(30,140,80,0.15); color: var(--green-glow); border: 1px solid var(--green); }
+    .quest-badge.inactive { background: rgba(30,30,58,0.4); color: var(--text-dim); border: 1px solid var(--border); }
+
+    /* ── Cinematic overlay ── */
+    #cinematic-overlay {
+      position: fixed; top: 60px; left: 0;
+      width: 100vw; height: calc(100vh - 60px);
+      z-index: 500; pointer-events: none; display: none;
+    }
+    #cinematic-overlay.active { display: block; pointer-events: all; }
+
+    #cinematic-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+    }
+
+    #cinematic-text {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    #cin-region-name {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 60px; color: var(--gold);
+      text-shadow: 0 0 40px rgba(201,168,76,0.8), 0 0 80px rgba(201,168,76,0.4);
+      opacity: 0; letter-spacing: 0.08em; text-align: center;
+      transition: none;
+    }
+    #cin-flavor {
+      font-family: 'IM Fell English', serif;
+      font-style: italic; font-size: 22px;
+      color: var(--gold-dim); margin-top: 18px;
+      opacity: 0; text-align: center; max-width: 600px; padding: 0 20px;
+    }
+
+    /* ── Overlay backdrop for drawer ── */
+    #drawer-backdrop {
+      position: fixed; inset: 0; top: 60px;
+      z-index: 190; display: none; background: transparent;
+    }
+    #drawer-backdrop.open { display: block; }
+
+    /* ── Scrollbar ── */
+    #drawer::-webkit-scrollbar { width: 4px; }
+    #drawer::-webkit-scrollbar-track { background: transparent; }
+    #drawer::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 767px) {
+      #drawer {
+        top: auto; bottom: 0; right: 0; left: 0;
+        width: 100%; height: 60vh;
+        transform: translateY(100%);
+        border-left: none; border-top: 1px solid var(--gold-dim);
+      }
+      #drawer.open { transform: translateY(0); }
+      #cin-region-name { font-size: 36px; }
+      #cin-flavor { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top nav bar -->
+<div id="topbar">
+  <a href="/">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M10 3L5 8L10 13" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Dashboard
+  </a>
+  <a href="/ashen" style="margin-left:16px;">🏚 Ashen City</a>
+  <a href="/story" style="margin-left:16px;">📜 Chronicle</a>
+  <a href="/library" style="margin-left:16px;">📚 Library</a>
+  <div class="title">World Map</div>
+  <div class="level-badge" id="level-badge">LVL —</div>
+  <button class="btn-logout" onclick="logout()">↩ LOGOUT</button>
+</div>
+
+<!-- Map canvas -->
+<canvas id="map-canvas"></canvas>
+
+<!-- Drawer backdrop -->
+<div id="drawer-backdrop"></div>
+
+<!-- Side drawer -->
+<div id="drawer">
+  <div id="drawer-header">
+    <div>
+      <div class="region-title" id="drawer-region-name">—</div>
+      <div class="region-subtitle" id="drawer-region-subtitle">—</div>
+      <div class="region-range" id="drawer-region-range">—</div>
+    </div>
+    <button id="drawer-close">&#x2715;</button>
+  </div>
+  <div id="drawer-body"></div>
+</div>
+
+<!-- Cinematic overlay -->
+<div id="cinematic-overlay">
+  <canvas id="cinematic-canvas"></canvas>
+  <div id="cinematic-text">
+    <div id="cin-region-name"></div>
+    <div id="cin-flavor"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+function logout() {
+  fetch('/api/logout', { method: 'POST' }).then(() => { window.location.href = '/login'; });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════════════ */
+const REGIONS = [
+  { id:'ashen',   name:'The Ashen City',     subtitle:'DLC I',   minLvl:1,  maxLvl:5,  unlockLvl:1,
+    lore:'Once the industrial heart of the old world, the Ashen City now lies fractured beneath a permanent grey shroud. Its towering smokestacks have gone cold, its streets littered with the remnants of a civilisation that burned itself to nothing. But in the ruins, something still smoulders.',
+    flavor:null,
+    particle:'ash',
+    palette:{ sky1:'#100e0c', sky2:'#1e1a14', ground:'#2a2420', accent:'#8a7040', fog:'rgba(12,10,8,0.88)' } },
+  { id:'savanna', name:'The Crimson Savanna', subtitle:'DLC II',  minLvl:6,  maxLvl:10, unlockLvl:6,
+    lore:'Beyond the ashen ruins the earth turns red. An ancient warrior kingdom once ruled these vast plains from a city of red stone and fire. Their rites of passage demanded blood and iron. Their warriors knew no retreat. Their legacy still breathes in the wind.',
+    flavor:'The plains call to those who proved themselves in ash...',
+    particle:'dust',
+    palette:{ sky1:'#120800', sky2:'#2a1004', ground:'#3a1808', accent:'#c06020', fog:'rgba(15,6,2,0.88)' } },
+  { id:'abyss',   name:'The Verdant Abyss',   subtitle:'DLC III', minLvl:11, maxLvl:15, unlockLvl:11,
+    lore:'Where the savanna ends the earth cracks open and the jungle swallows everything whole. Ancient temples sink slowly beneath centuries of growth. Bioluminescent creatures pulse in the darkness below the canopy. Those who enter seldom return unchanged.',
+    flavor:'The jungle stirs. Ancient eyes turn toward you...',
+    particle:'bio',
+    palette:{ sky1:'#010a05', sky2:'#021508', ground:'#031a0a', accent:'#20c060', fog:'rgba(1,8,4,0.90)' } },
+  { id:'throne',  name:'The Shadow Throne',   subtitle:'DLC IV',  minLvl:16, maxLvl:20, unlockLvl:16,
+    lore:'The final realm exists between worlds — a void palace assembled from the echoes of every domain conquered before it. No map can fully capture it. No warrior has claimed it and remained mortal. It calls only to those who have transcended all that came before.',
+    flavor:'The throne has always been yours. Now claim it.',
+    particle:'void',
+    palette:{ sky1:'#020206', sky2:'#06060f', ground:'#0a0a18', accent:'#c9a84c', fog:'rgba(2,2,6,0.92)' } },
+];
+
+const BOSS_REGIONS = {
+  savanna: '30-day gym streak',
+  abyss:   'Secure a job offer',
+  throne:  '10 perfect days',
+};
+
+const QUEST_TAGS = {
+  ashen:   'weekly',
+  savanna: 'weekly',
+  abyss:   'monthly',
+  throne:  'boss',
+};
+
+const PATH_WAYPOINTS = [
+  [0.04, 0.72], [0.09, 0.62], [0.14, 0.55], [0.19, 0.58], [0.24, 0.52],
+  [0.29, 0.60], [0.33, 0.52], [0.38, 0.55], [0.43, 0.48], [0.48, 0.55],
+  [0.53, 0.50], [0.57, 0.44], [0.62, 0.48], [0.67, 0.42], [0.72, 0.50],
+  [0.77, 0.46], [0.81, 0.40], [0.86, 0.44], [0.90, 0.40], [0.95, 0.45],
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════ */
+let mapData = null;
+
+// Region background images
+let ashenImg = null, savannaImg = null, abyssImg = null, throneImg = null;
+(function() {
+  const a = new Image(); a.onload = () => { ashenImg = a; };   a.src = '/ashen-city.png';
+  const s = new Image(); s.onload = () => { savannaImg = s; }; s.src = '/savanna.png';
+  const b = new Image(); b.onload = () => { abyssImg = b; };   b.src = '/abyss.png';
+  const t = new Image(); t.onload = () => { throneImg = t; };  t.src = '/throne.png';
+})();
+let playerLevel = 1;
+let time = 0;
+
+// Particle pools per region (index 0-3)
+const regionParticles = [[], [], [], []];
+
+// Void pulses for throne region
+const voidPulses = [];
+
+// Cinematic queue
+const cinematicQueue = [];
+let cinematicActive = false;
+let cinematicStart = 0;
+let cinematicRegionIdx = -1;
+let cinematicBursts = [];
+
+/* ═══════════════════════════════════════════════════════════════
+   CANVAS SETUP
+═══════════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('map-canvas');
+const ctx    = canvas.getContext('2d');
+const cinCanvas = document.getElementById('cinematic-canvas');
+const cinCtx    = cinCanvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight - 60;
+  cinCanvas.width  = canvas.width;
+  cinCanvas.height = canvas.height;
+  initAllParticles();
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════ */
+function regionX(idx) { return (canvas.width / 4) * idx; }
+function regionW()    { return canvas.width / 4; }
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+function rand(min, max) { return min + Math.random() * (max - min); }
+function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+
+/* ═══════════════════════════════════════════════════════════════
+   PARTICLE INIT
+═══════════════════════════════════════════════════════════════ */
+function initAshParticles(idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  const arr = [];
+  for (let i = 0; i < 35; i++) {
+    arr.push({
+      x: X + rand(0, W),
+      y: rand(0, H),
+      r: rand(0.8, 2),
+      vy: rand(0.3, 0.9),
+      vx: rand(-0.15, 0.15),
+      wobble: rand(0, Math.PI * 2),
+      wobbleSpeed: rand(0.01, 0.03),
+      alpha: rand(0.3, 0.7),
+    });
+  }
+  return arr;
+}
+
+function initDustParticles(idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  const arr = [];
+  for (let i = 0; i < 30; i++) {
+    arr.push({
+      x: X + rand(0, W),
+      y: rand(0, H),
+      r: rand(0.5, 1.5),
+      vy: rand(-0.4, -0.1),
+      vx: rand(-0.1, 0.1),
+      wobble: rand(0, Math.PI * 2),
+      wobbleSpeed: rand(0.01, 0.025),
+      alpha: rand(0.2, 0.5),
+    });
+  }
+  return arr;
+}
+
+function initBioParticles(idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  const arr = [];
+  // Bio glows
+  for (let i = 0; i < 30; i++) {
+    arr.push({
+      type: 'bio',
+      x: X + rand(0, W),
+      y: rand(0, H),
+      r: rand(1, 2.5),
+      vy: rand(-0.5, -0.1),
+      vx: rand(-0.08, 0.08),
+      wobble: rand(0, Math.PI * 2),
+      wobbleSpeed: rand(0.008, 0.02),
+      alpha: rand(0.3, 0.7),
+      hue: rand(140, 180),
+    });
+  }
+  // Rain streaks
+  for (let i = 0; i < 15; i++) {
+    arr.push({
+      type: 'rain',
+      x: X + rand(0, W),
+      y: rand(-H, 0),
+      len: rand(8, 18),
+      vy: rand(3, 6),
+      alpha: rand(0.2, 0.45),
+    });
+  }
+  return arr;
+}
+
+function initVoidParticles(idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  const arr = [];
+  // Reduced ash
+  for (let i = 0; i < 15; i++) {
+    arr.push({ type:'ash', x: X+rand(0,W), y:rand(0,H), r:rand(0.8,1.5), vy:rand(0.2,0.6), vx:rand(-0.1,0.1), wobble:rand(0,Math.PI*2), wobbleSpeed:rand(0.01,0.02), alpha:rand(0.2,0.5) });
+  }
+  // Reduced dust
+  for (let i = 0; i < 10; i++) {
+    arr.push({ type:'dust', x: X+rand(0,W), y:rand(0,H), r:rand(0.5,1.2), vy:rand(-0.3,-0.1), vx:rand(-0.08,0.08), wobble:rand(0,Math.PI*2), wobbleSpeed:rand(0.01,0.02), alpha:rand(0.15,0.4) });
+  }
+  // Reduced bio
+  for (let i = 0; i < 10; i++) {
+    arr.push({ type:'bio', x: X+rand(0,W), y:rand(0,H), r:rand(1,2), vy:rand(-0.3,-0.08), vx:rand(-0.06,0.06), wobble:rand(0,Math.PI*2), wobbleSpeed:rand(0.008,0.015), alpha:rand(0.2,0.5), hue:rand(240,280) });
+  }
+  return arr;
+}
+
+function initAllParticles() {
+  regionParticles[0] = initAshParticles(0);
+  regionParticles[1] = initDustParticles(1);
+  regionParticles[2] = initBioParticles(2);
+  regionParticles[3] = initVoidParticles(3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PARTICLE UPDATE
+═══════════════════════════════════════════════════════════════ */
+function updateAshParticles(arr, idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  for (const p of arr) {
+    p.wobble += p.wobbleSpeed;
+    p.x += p.vx + Math.sin(p.wobble) * 0.3;
+    p.y += p.vy;
+    if (p.y > H + 5) { p.y = -5; p.x = X + rand(0, W); }
+    if (p.x < X) p.x = X + W;
+    if (p.x > X + W) p.x = X;
+  }
+}
+
+function updateDustParticles(arr, idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  for (const p of arr) {
+    p.wobble += p.wobbleSpeed;
+    p.x += p.vx + Math.cos(p.wobble) * 0.2;
+    p.y += p.vy;
+    if (p.y < -5) { p.y = H + 5; p.x = X + rand(0, W); }
+    if (p.x < X) p.x = X + W;
+    if (p.x > X + W) p.x = X;
+  }
+}
+
+function updateBioParticles(arr, idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  for (const p of arr) {
+    if (p.type === 'bio') {
+      p.wobble += p.wobbleSpeed;
+      p.x += p.vx + Math.sin(p.wobble) * 0.25;
+      p.y += p.vy;
+      if (p.y < -5) { p.y = H + 5; p.x = X + rand(0, W); }
+      if (p.x < X) p.x = X + W;
+      if (p.x > X + W) p.x = X;
+    } else {
+      p.y += p.vy;
+      if (p.y > H + 20) { p.y = rand(-50, 0); p.x = X + rand(0, W); }
+      if (p.x < X) p.x = X + W;
+      if (p.x > X + W) p.x = X;
+    }
+  }
+}
+
+function updateVoidParticles(arr, idx) {
+  const W = regionW(), X = regionX(idx), H = canvas.height;
+  for (const p of arr) {
+    if (p.type === 'ash') {
+      p.wobble += p.wobbleSpeed;
+      p.x += p.vx + Math.sin(p.wobble) * 0.2;
+      p.y += p.vy;
+      if (p.y > H + 5) { p.y = -5; p.x = X + rand(0, W); }
+      if (p.x < X) p.x = X + W;
+      if (p.x > X + W) p.x = X;
+    } else if (p.type === 'dust') {
+      p.wobble += p.wobbleSpeed;
+      p.x += p.vx + Math.cos(p.wobble) * 0.15;
+      p.y += p.vy;
+      if (p.y < -5) { p.y = H + 5; p.x = X + rand(0, W); }
+      if (p.x < X) p.x = X + W;
+      if (p.x > X + W) p.x = X;
+    } else {
+      p.wobble += p.wobbleSpeed;
+      p.x += p.vx + Math.sin(p.wobble) * 0.18;
+      p.y += p.vy;
+      if (p.y < -5) { p.y = H + 5; p.x = X + rand(0, W); }
+      if (p.x < X) p.x = X + W;
+      if (p.x > X + W) p.x = X;
+    }
+  }
+}
+
+let lastVoidPulse = 0;
+function maybeSpawnVoidPulse() {
+  if (time - lastVoidPulse > rand(3, 4)) {
+    lastVoidPulse = time;
+    const idx = 3;
+    const W = regionW(), X = regionX(idx), H = canvas.height;
+    voidPulses.push({ cx: X + W/2, cy: H * 0.5, r: 0, maxR: W * 0.35, alpha: 0.8, speed: W * 0.003 });
+  }
+  // update
+  for (let i = voidPulses.length - 1; i >= 0; i--) {
+    const p = voidPulses[i];
+    p.r += p.speed;
+    p.alpha = 0.8 * (1 - p.r / p.maxR);
+    if (p.r >= p.maxR) voidPulses.splice(i, 1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW PARTICLES
+═══════════════════════════════════════════════════════════════ */
+function drawAshParticles(arr) {
+  for (const p of arr) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,195,185,${p.alpha})`;
+    ctx.fill();
+  }
+}
+
+function drawDustParticles(arr) {
+  for (const p of arr) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(180,80,30,${p.alpha})`;
+    ctx.fill();
+  }
+}
+
+function drawBioParticles(arr) {
+  for (const p of arr) {
+    if (p.type === 'bio') {
+      // Glow pass
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},80%,50%,${p.alpha * 0.15})`;
+      ctx.fill();
+      // Core
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},90%,65%,${p.alpha})`;
+      ctx.fill();
+    } else {
+      // Rain streak
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x + 0.5, p.y + p.len);
+      ctx.strokeStyle = `rgba(180,220,255,${p.alpha})`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+  }
+}
+
+function drawVoidParticles(arr) {
+  for (const p of arr) {
+    if (p.type === 'ash') {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(150,140,160,${p.alpha})`;
+      ctx.fill();
+    } else if (p.type === 'dust') {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(120,80,160,${p.alpha})`;
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 2, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},60%,50%,${p.alpha * 0.12})`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},70%,60%,${p.alpha})`;
+      ctx.fill();
+    }
+  }
+  // Void pulses
+  for (const p of voidPulses) {
+    ctx.beginPath();
+    ctx.arc(p.cx, p.cy, p.r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(201,168,76,${p.alpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TERRAIN DRAWING
+═══════════════════════════════════════════════════════════════ */
+function drawAshen(X, W, H, pal) {
+  const groundY = H * 0.70;
+  const charcoal = '#3a3530';
+  const charcoal2 = '#2e2825';
+
+  // Background buildings (far)
+  ctx.fillStyle = charcoal2;
+  const bldFar = [
+    [0.05,0.65,0.08,0.40], [0.12,0.58,0.06,0.45], [0.20,0.60,0.07,0.42],
+    [0.30,0.55,0.09,0.48], [0.40,0.62,0.06,0.40], [0.50,0.57,0.08,0.45],
+    [0.60,0.60,0.07,0.42], [0.70,0.53,0.10,0.50], [0.80,0.58,0.06,0.44],
+    [0.88,0.62,0.08,0.40],
+  ];
+  for (const [fx, fy, fw, fh] of bldFar) {
+    ctx.fillRect(X + fx*W, fy*H, fw*W, fh*H);
+  }
+
+  // Broken building silhouettes with missing tops
+  ctx.fillStyle = charcoal;
+  const buildings = [
+    { fx:0.03, fw:0.10, fh:0.38, bTop:0.30, notch:[[0.02,0.06],[0.06,0.04]] },
+    { fx:0.14, fw:0.08, fh:0.42, bTop:0.28, notch:[[0.01,0.03]] },
+    { fx:0.24, fw:0.12, fh:0.36, bTop:0.34, notch:[[0.03,0.05],[0.07,0.03]] },
+    { fx:0.38, fw:0.09, fh:0.40, bTop:0.30, notch:[[0.02,0.04]] },
+    { fx:0.52, fw:0.11, fh:0.35, bTop:0.35, notch:[[0.04,0.04],[0.08,0.03]] },
+    { fx:0.65, fw:0.08, fh:0.38, bTop:0.32, notch:[[0.02,0.03]] },
+    { fx:0.76, fw:0.13, fh:0.42, bTop:0.28, notch:[[0.05,0.05]] },
+    { fx:0.88, fw:0.09, fh:0.37, bTop:0.33, notch:[[0.02,0.04]] },
+  ];
+  for (const b of buildings) {
+    const bx = X + b.fx*W, by = b.bTop*H;
+    const bw = b.fw*W, bh = b.fh*H;
+    // Main body
+    ctx.fillRect(bx, by, bw, bh);
+    // Notches (missing chunks from top)
+    ctx.fillStyle = charcoal2;
+    for (const [nx, nw] of b.notch) {
+      ctx.fillRect(bx + nx*W, by, nw*W, 0.06*H);
+    }
+    ctx.fillStyle = charcoal;
+    // Window glints
+    ctx.fillStyle = 'rgba(120,100,60,0.15)';
+    for (let wr = 0; wr < 3; wr++) {
+      for (let wc = 0; wc < 2; wc++) {
+        ctx.fillRect(bx + 4 + wc*10, by + 10 + wr*12, 5, 7);
+      }
+    }
+    ctx.fillStyle = charcoal;
+  }
+
+  // Smokestacks
+  ctx.fillStyle = '#302c28';
+  const stacks = [0.08, 0.22, 0.55, 0.82];
+  for (const fx of stacks) {
+    const sx = X + fx*W;
+    const sh = H * rand(0.20, 0.32);
+    const sy = groundY - sh;
+    const sw = W * 0.022;
+    ctx.fillRect(sx - sw/2, sy, sw, sh);
+    // cap
+    ctx.fillRect(sx - sw*0.7, sy, sw*1.4, sw*0.4);
+    // smoke wisp
+    const wispAlpha = 0.06 + 0.04 * Math.sin(time * 0.5 + fx * 10);
+    const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy - 20, 20);
+    grad.addColorStop(0, `rgba(80,75,65,${wispAlpha})`);
+    grad.addColorStop(1, 'rgba(80,75,65,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(sx, sy - 10, 16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#302c28';
+  }
+
+  // Ground rubble
+  ctx.fillStyle = '#3a3025';
+  for (let i = 0; i < 18; i++) {
+    const rx = X + (i / 18) * W + rand(-0.01, 0.01)*W;
+    const ry = groundY + rand(0, H * 0.08);
+    const rw = rand(W*0.015, W*0.06);
+    const rh = rand(H*0.01, H*0.04);
+    ctx.fillRect(rx, ry, rw, rh);
+  }
+}
+
+function drawSavanna(X, W, H, pal) {
+  const groundY = H * 0.70;
+
+  // Rolling hills
+  ctx.fillStyle = '#3a2010';
+  ctx.beginPath();
+  ctx.moveTo(X, groundY);
+  const hillPoints = [
+    [0,    groundY],
+    [0.15, groundY - H*0.06],
+    [0.30, groundY - H*0.02],
+    [0.45, groundY - H*0.08],
+    [0.60, groundY - H*0.03],
+    [0.75, groundY - H*0.07],
+    [0.90, groundY - H*0.02],
+    [1.0,  groundY],
+  ];
+  ctx.moveTo(X + hillPoints[0][0]*W, hillPoints[0][1]);
+  for (let i = 0; i < hillPoints.length - 1; i++) {
+    const cx = X + (hillPoints[i][0] + hillPoints[i+1][0])/2 * W;
+    const cy = (hillPoints[i][1] + hillPoints[i+1][1]) / 2;
+    ctx.quadraticCurveTo(X + hillPoints[i][0]*W, hillPoints[i][1], cx, cy);
+  }
+  ctx.lineTo(X + W, H);
+  ctx.lineTo(X, H);
+  ctx.closePath();
+  ctx.fill();
+
+  // Distant flat horizon detail
+  ctx.fillStyle = '#281208';
+  ctx.fillRect(X, H * 0.62, W, H * 0.02);
+
+  // Acacia trees
+  const trees = [0.08, 0.25, 0.55, 0.78, 0.92];
+  for (let ti = 0; ti < trees.length; ti++) {
+    const tx = X + trees[ti]*W;
+    const ty = groundY - H*0.03;
+    const treeH = H * rand(0.12, 0.20);
+    const trunkW = W * 0.008;
+    ctx.fillStyle = '#4a2808';
+    ctx.fillRect(tx - trunkW/2, ty - treeH, trunkW, treeH);
+    // branches
+    ctx.fillRect(tx - trunkW*3, ty - treeH*0.7, trunkW*6, trunkW);
+    // canopy
+    const canopyR = W * rand(0.04, 0.065);
+    ctx.fillStyle = '#2a1a08';
+    ctx.beginPath();
+    ctx.ellipse(tx - canopyR*0.8, ty - treeH, canopyR*0.7, canopyR*0.35, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(tx + canopyR*0.5, ty - treeH, canopyR*0.8, canopyR*0.3, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(tx, ty - treeH - canopyR*0.1, canopyR*0.6, canopyR*0.25, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Scattered rocks
+  ctx.fillStyle = '#502810';
+  for (let i = 0; i < 12; i++) {
+    const rx = X + (i / 12) * W + rand(0, W*0.05);
+    const ry = groundY + rand(0, H * 0.06);
+    ctx.beginPath();
+    ctx.ellipse(rx, ry, rand(W*0.008,W*0.02), rand(H*0.006,H*0.012), rand(0,Math.PI), 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawAbyss(X, W, H, pal) {
+  const groundY = H * 0.70;
+
+  // Dense jungle canopy
+  const canopyBase = H * 0.18;
+  ctx.fillStyle = '#021208';
+  // Multiple overlapping ovals
+  for (let i = 0; i < 22; i++) {
+    const cx = X + (i / 21) * W + rand(-0.03, 0.03)*W;
+    const cy = canopyBase + rand(-H*0.06, H*0.06);
+    const rx = W * rand(0.04, 0.09);
+    const ry = H * rand(0.06, 0.12);
+    const shade = Math.floor(rand(2, 18));
+    ctx.fillStyle = `rgb(${shade},${shade + rand(8,20) | 0},${shade})`;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, rand(-0.3, 0.3), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Darker layer
+  for (let i = 0; i < 14; i++) {
+    const cx = X + (i / 13) * W + rand(-0.05, 0.05)*W;
+    const cy = canopyBase - H*0.04 + rand(-H*0.03, H*0.03);
+    const rx = W * rand(0.03, 0.07);
+    const ry = H * rand(0.04, 0.08);
+    ctx.fillStyle = '#010a04';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, rand(-0.2, 0.2), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Temple spire tips poking through
+  ctx.fillStyle = '#1a3020';
+  const spires = [0.18, 0.45, 0.70];
+  for (const fx of spires) {
+    const sx = X + fx*W;
+    const spireH = H * 0.12;
+    const base = canopyBase + H*0.02;
+    ctx.beginPath();
+    ctx.moveTo(sx - W*0.02, base);
+    ctx.lineTo(sx, base - spireH);
+    ctx.lineTo(sx + W*0.02, base);
+    ctx.closePath();
+    ctx.fill();
+    // Small windows on spire
+    ctx.fillStyle = 'rgba(60,255,120,0.12)';
+    ctx.fillRect(sx - 2, base - spireH*0.5, 4, 5);
+  }
+
+  // Waterfall/river line
+  ctx.strokeStyle = 'rgba(30,120,80,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(X + W*0.62, H*0.25);
+  ctx.bezierCurveTo(X + W*0.65, H*0.40, X + W*0.60, H*0.55, X + W*0.63, groundY);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(30,180,100,0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(X + W*0.63, H*0.25);
+  ctx.bezierCurveTo(X + W*0.66, H*0.40, X + W*0.61, H*0.55, X + W*0.64, groundY);
+  ctx.stroke();
+
+  // Ground foliage
+  ctx.fillStyle = '#031408';
+  for (let i = 0; i < 20; i++) {
+    const fx = X + (i / 19) * W + rand(-0.02, 0.02)*W;
+    const fy = groundY + rand(0, H*0.08);
+    ctx.beginPath();
+    ctx.ellipse(fx, fy, rand(W*0.01,W*0.04), rand(H*0.01,H*0.03), rand(-1,1), 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawThrone(X, W, H, pal) {
+  const groundY = H * 0.70;
+
+  // Void cracks (jagged lines radiating outward)
+  const crackColors = ['rgba(80,60,160,0.3)', 'rgba(100,70,200,0.2)', 'rgba(201,168,76,0.15)'];
+  for (let c = 0; c < 8; c++) {
+    const angle = (c / 8) * Math.PI * 2;
+    const cx = X + W * 0.5;
+    const cy = H * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    let px = cx, py = cy;
+    const steps = 6;
+    const totalLen = W * rand(0.25, 0.45);
+    for (let s = 0; s < steps; s++) {
+      const jitter = (Math.random() - 0.5) * W * 0.06;
+      const newX = px + Math.cos(angle) * (totalLen/steps) + Math.cos(angle + Math.PI/2) * jitter;
+      const newY = py + Math.sin(angle) * (totalLen/steps) + Math.sin(angle + Math.PI/2) * jitter;
+      ctx.lineTo(newX, newY);
+      px = newX; py = newY;
+    }
+    ctx.strokeStyle = crackColors[c % crackColors.length];
+    ctx.lineWidth = rand(0.5, 1.5);
+    ctx.stroke();
+  }
+
+  // Floating rock platforms
+  ctx.fillStyle = '#0d0d20';
+  const platforms = [
+    [0.10, 0.55, 0.18, 0.04],
+    [0.35, 0.45, 0.22, 0.05],
+    [0.62, 0.50, 0.16, 0.04],
+    [0.80, 0.42, 0.15, 0.04],
+    [0.20, 0.38, 0.14, 0.03],
+    [0.55, 0.33, 0.20, 0.04],
+  ];
+  for (const [pfx, pfy, pfw, pfh] of platforms) {
+    const px = X + pfx*W, py = pfy*H;
+    const pw = pfw*W, ph = pfh*H;
+    // Platform shape (slightly irregular polygon)
+    ctx.beginPath();
+    ctx.moveTo(px, py + ph*0.3);
+    ctx.lineTo(px + pw*0.05, py);
+    ctx.lineTo(px + pw*0.95, py);
+    ctx.lineTo(px + pw, py + ph*0.4);
+    ctx.lineTo(px + pw*0.92, py + ph);
+    ctx.lineTo(px + pw*0.08, py + ph);
+    ctx.closePath();
+    ctx.fillStyle = '#0c0c1e';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(201,168,76,0.2)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    // Drip shadow underneath
+    const dripGrad = ctx.createLinearGradient(px, py+ph, px, py+ph+12);
+    dripGrad.addColorStop(0, 'rgba(0,0,0,0.4)');
+    dripGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = dripGrad;
+    ctx.fillRect(px, py+ph, pw, 12);
+  }
+
+  // Energy lines from center (animating)
+  const ecx = X + W*0.5, ecy = H*0.48;
+  for (let e = 0; e < 6; e++) {
+    const angle = (e / 6) * Math.PI * 2 + time * 0.3;
+    const len = W * (0.15 + 0.05 * Math.sin(time + e));
+    const alpha = 0.15 + 0.1 * Math.sin(time * 1.5 + e * 1.2);
+    ctx.beginPath();
+    ctx.moveTo(ecx, ecy);
+    ctx.lineTo(ecx + Math.cos(angle)*len, ecy + Math.sin(angle)*len);
+    ctx.strokeStyle = `rgba(201,168,76,${alpha})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Throne silhouette
+  const tx = X + W*0.5, ty = H*0.38;
+  const tScaleX = W * 0.12, tScaleY = H * 0.16;
+  ctx.fillStyle = '#060614';
+  // Seat
+  ctx.fillRect(tx - tScaleX*0.6, ty + tScaleY*0.5, tScaleX*1.2, tScaleY*0.12);
+  // Left armrest
+  ctx.fillRect(tx - tScaleX*0.6, ty + tScaleY*0.2, tScaleX*0.12, tScaleY*0.3);
+  // Right armrest
+  ctx.fillRect(tx + tScaleX*0.48, ty + tScaleY*0.2, tScaleX*0.12, tScaleY*0.3);
+  // Back
+  ctx.fillRect(tx - tScaleX*0.5, ty, tScaleX, tScaleY*0.5);
+  // Crown spires on top
+  const spirePositions = [-0.4, -0.15, 0, 0.15, 0.4];
+  const spireHeights   = [0.15, 0.20, 0.28, 0.20, 0.15];
+  for (let si = 0; si < spirePositions.length; si++) {
+    const sx = tx + tScaleX * spirePositions[si];
+    ctx.beginPath();
+    ctx.moveTo(sx - tScaleX*0.05, ty);
+    ctx.lineTo(sx, ty - tScaleY * spireHeights[si]);
+    ctx.lineTo(sx + tScaleX*0.05, ty);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Gold outline glow
+  const gAlpha = 0.3 + 0.15 * Math.sin(time * 1.2);
+  ctx.strokeStyle = `rgba(201,168,76,${gAlpha})`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(tx - tScaleX*0.6, ty, tScaleX*1.2, tScaleY*0.62);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW PATH
+═══════════════════════════════════════════════════════════════ */
+function drawPath() {
+  const W = canvas.width, H = canvas.height;
+  const pts = PATH_WAYPOINTS.map(([fx, fy]) => [fx * W, fy * H]);
+
+  // Draw segments between consecutive waypoint midpoints
+  // Waypoints 0-4: ashen, 5-9: savanna, 10-14: abyss, 15-19: throne
+  const segmentRegion = [0,0,0,0, 1,1,1,1, 2,2,2,2, 3,3,3,3,3,3,3]; // per-segment region index
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i], p1 = pts[i+1];
+    // midpoints for smooth curve
+    const mx = (p0[0] + p1[0]) / 2;
+    const my = (p0[1] + p1[1]) / 2;
+
+    // Region index for coloring: use the region of the starting waypoint
+    const regionIdx = Math.floor(i / 5);
+    const region = REGIONS[regionIdx];
+    const unlocked = playerLevel >= region.unlockLvl;
+
+    ctx.beginPath();
+    if (i === 0) {
+      ctx.moveTo(p0[0], p0[1]);
+    } else {
+      const prevMx = (pts[i-1][0] + p0[0]) / 2;
+      const prevMy = (pts[i-1][1] + p0[1]) / 2;
+      ctx.moveTo(prevMx, prevMy);
+    }
+    ctx.quadraticCurveTo(p0[0], p0[1], mx, my);
+
+    if (unlocked) {
+      ctx.strokeStyle = '#c9a84c';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([]);
+    } else {
+      ctx.strokeStyle = 'rgba(130,110,180,0.55)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 4]);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw level stop markers
+  for (let i = 0; i < pts.length; i++) {
+    const lvl = i + 1;
+    const [px, py] = pts[i];
+    const isCurrent  = lvl === playerLevel;
+    const isPast     = lvl < playerLevel;
+    const regionIdx  = Math.floor(i / 5);
+    const unlocked   = playerLevel >= REGIONS[regionIdx].unlockLvl;
+
+    // Skip current level — drawn by drawPlayer as the gold orb
+    if (isCurrent) continue;
+
+    // Level 20 — crown icon
+    if (lvl === 20) {
+      ctx.font = '18px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(201,168,76,0.9)';
+      ctx.shadowBlur = isPast ? 16 : 8;
+      ctx.globalAlpha = isPast ? 1.0 : 0.55;
+      ctx.fillText('👑', px, py);
+      ctx.globalAlpha = 1.0;
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+      // "20" label below
+      ctx.font = `bold 8px 'Cinzel', serif`;
+      ctx.fillStyle = isPast ? 'rgba(240,208,128,0.9)' : 'rgba(150,130,200,0.75)';
+      ctx.fillText('20', px, py + 14);
+      continue;
+    }
+
+    const d = isPast ? 5 : 4; // diamond half-size
+
+    // Diamond shape
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(Math.PI / 4);
+    ctx.beginPath();
+    ctx.rect(-d, -d, d * 2, d * 2);
+
+    if (isPast) {
+      ctx.fillStyle = '#c9a84c';
+      ctx.strokeStyle = '#f0d080';
+      ctx.lineWidth = 1;
+      ctx.fill();
+      ctx.stroke();
+    } else if (unlocked) {
+      ctx.fillStyle = 'rgba(201,168,76,0.25)';
+      ctx.strokeStyle = 'rgba(201,168,76,0.5)';
+      ctx.lineWidth = 0.8;
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(60,50,90,0.6)';
+      ctx.strokeStyle = 'rgba(130,110,180,0.7)';
+      ctx.lineWidth = 0.8;
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Level number below the diamond
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = `bold 8px 'Cinzel', serif`;
+    if (isPast) {
+      ctx.fillStyle = 'rgba(240,208,128,0.9)';
+      ctx.shadowColor = 'rgba(201,168,76,0.6)';
+      ctx.shadowBlur = 4;
+    } else if (unlocked) {
+      ctx.fillStyle = 'rgba(201,168,76,0.55)';
+      ctx.shadowBlur = 0;
+    } else {
+      ctx.fillStyle = 'rgba(150,130,200,0.75)';
+      ctx.shadowBlur = 0;
+    }
+    ctx.fillText(lvl, px, py + d + 4);
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW PLAYER MARKER
+═══════════════════════════════════════════════════════════════ */
+function drawPlayer() {
+  if (!playerLevel || playerLevel < 1 || playerLevel > 20) return;
+  const W = canvas.width, H = canvas.height;
+  const wp = PATH_WAYPOINTS[playerLevel - 1];
+  const px = wp[0] * W, py = wp[1] * H;
+
+  // Pulsing rings
+  for (let ring = 1; ring <= 3; ring++) {
+    const phase = (time * 2 + ring * 0.8) % (Math.PI * 2);
+    const ringR = 10 + ring * 8 + Math.sin(phase) * 4;
+    const ringAlpha = 0.5 - ring * 0.12 - Math.sin(phase) * 0.1;
+    ctx.beginPath();
+    ctx.arc(px, py, ringR, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(201,168,76,${Math.max(0,ringAlpha)})`;
+    ctx.lineWidth = 1.5 - ring * 0.3;
+    ctx.stroke();
+  }
+
+  // Core circle
+  ctx.beginPath();
+  ctx.arc(px, py, 10, 0, Math.PI * 2);
+  ctx.fillStyle = '#c9a84c';
+  ctx.fill();
+  ctx.strokeStyle = '#f0d080';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Level number
+  ctx.font = 'bold 9px Cinzel, serif';
+  ctx.fillStyle = '#03030a';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(playerLevel), px, py);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW FOG OF WAR
+═══════════════════════════════════════════════════════════════ */
+function drawFog(idx, region) {
+  const X = regionX(idx), W = regionW(), H = canvas.height;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(X, 0, W, H);
+  ctx.clip();
+
+  // Main overlay
+  ctx.fillStyle = region.palette.fog;
+  ctx.fillRect(X, 0, W, H);
+
+  // Animated fog wisps
+  for (let w = 0; w < 6; w++) {
+    const baseX = X + W * (0.1 + (w / 5) * 0.8);
+    const baseY = H * (0.2 + (w % 3) * 0.25);
+    const cx = baseX + Math.sin(time * 0.4 + w * 1.2) * W * 0.08;
+    const cy = baseY + Math.cos(time * 0.3 + w * 0.9) * H * 0.06;
+    const r = W * (0.15 + 0.08 * Math.sin(time * 0.25 + w));
+
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(3,3,10,0.55)');
+    grad.addColorStop(1, 'rgba(3,3,10,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW REGION LABELS
+═══════════════════════════════════════════════════════════════ */
+function drawRegionLabel(idx, region, locked) {
+  const X = regionX(idx), W = regionW();
+  const cx = X + W / 2;
+  const alpha = 1.0;
+
+  // Region name
+  ctx.font = `bold 14px 'Cinzel Decorative', serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = `rgba(201,168,76,${alpha})`;
+  // Shadow
+  ctx.shadowColor = 'rgba(201,168,76,0.4)';
+  ctx.shadowBlur = 12;
+  ctx.fillText(region.name, cx, 14);
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = 'transparent';
+
+  // Subtitle
+  ctx.font = `10px 'Cinzel', serif`;
+  ctx.fillStyle = `rgba(90,68,24,${alpha})`;
+  ctx.fillText(region.subtitle, cx, 34);
+
+  // Level range
+  ctx.font = `9px 'Cinzel', serif`;
+  ctx.fillStyle = `rgba(153,153,187,${alpha})`;
+  ctx.fillText(`Levels ${region.minLvl} – ${region.maxLvl}`, cx, 50);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW REGION BORDERS
+═══════════════════════════════════════════════════════════════ */
+function drawRegionBorders() {
+  const H = canvas.height;
+  const W = regionW();
+
+  // Vertical dividers between regions
+  for (let i = 1; i < 4; i++) {
+    const bx = i * W;
+    ctx.strokeStyle = '#5a4418';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(bx, 0);
+    ctx.lineTo(bx, H);
+    ctx.stroke();
+
+    // Diamond ornaments
+    const dSize = 5;
+    const diamonds = [0, H * 0.25, H * 0.5, H * 0.75, H];
+    ctx.fillStyle = '#c9a84c';
+    for (const dy of diamonds) {
+      ctx.beginPath();
+      ctx.moveTo(bx, dy - dSize);
+      ctx.lineTo(bx + dSize, dy);
+      ctx.lineTo(bx, dy + dSize);
+      ctx.lineTo(bx - dSize, dy);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW MAP BORDER
+═══════════════════════════════════════════════════════════════ */
+function drawMapBorder() {
+  const W = canvas.width, H = canvas.height;
+
+  // Outer line
+  ctx.strokeStyle = 'rgba(90,68,24,0.8)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, 0, W, H);
+
+  // Inner line (4px inset)
+  ctx.strokeStyle = 'rgba(201,168,76,0.6)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(4, 4, W - 8, H - 8);
+
+  // Corner diamonds
+  const corners = [[0,0],[W,0],[0,H],[W,H]];
+  const dSize = 8;
+  ctx.fillStyle = '#c9a84c';
+  for (const [cx, cy] of corners) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - dSize);
+    ctx.lineTo(cx + dSize, cy);
+    ctx.lineTo(cx, cy + dSize);
+    ctx.lineTo(cx - dSize, cy);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAW LEGEND
+═══════════════════════════════════════════════════════════════ */
+function drawLegend() {
+  const H = canvas.height;
+  const panelX = 12, panelY = H - 88;
+  const panelW = 130, panelH = 76;
+
+  // Background
+  ctx.fillStyle = 'rgba(7,7,16,0.82)';
+  ctx.fillRect(panelX, panelY, panelW, panelH);
+  ctx.strokeStyle = 'rgba(90,68,24,0.6)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(panelX, panelY, panelW, panelH);
+
+  const items = [
+    { draw: (x,y) => {
+        ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI*2);
+        ctx.fillStyle = '#c9a84c'; ctx.fill();
+      }, label:'Your Position' },
+    { draw: (x,y) => {
+        const g = ctx.createRadialGradient(x,y,0,x,y,8);
+        g.addColorStop(0,'rgba(10,8,15,0.9)');
+        g.addColorStop(1,'rgba(10,8,15,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle='rgba(90,68,24,0.4)';
+        ctx.lineWidth=1; ctx.stroke();
+      }, label:'Locked Region' },
+    { draw: (x,y) => {
+        ctx.font='12px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='rgba(200,180,80,0.8)'; ctx.fillText('☠',x,y);
+      }, label:'Boss Location' },
+  ];
+
+  ctx.font = '9px Cinzel, serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#9999bb';
+
+  items.forEach((item, i) => {
+    const iy = panelY + 16 + i * 20;
+    item.draw(panelX + 16, iy);
+    ctx.fillStyle = '#9999bb';
+    ctx.fillText(item.label, panelX + 30, iy);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN DRAW LOOP
+═══════════════════════════════════════════════════════════════ */
+function draw() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  REGIONS.forEach((region, idx) => {
+    const X = regionX(idx), RW = regionW();
+    const locked = playerLevel < region.unlockLvl;
+
+    // Background
+    // Background — photo if available, else procedural
+    const bgImg = (idx === 0 && ashenImg)   ? ashenImg
+                : (idx === 1 && savannaImg) ? savannaImg
+                : (idx === 2 && abyssImg)   ? abyssImg
+                : (idx === 3 && throneImg)  ? throneImg
+                : null;
+
+    if (bgImg) {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(X, 0, RW, H); ctx.clip();
+      const ia = bgImg.width / bgImg.height, ra = RW / H;
+      let sx, sy, sw, sh;
+      if (ia > ra) { sh = bgImg.height; sw = sh * ra; sx = (bgImg.width - sw) / 2; sy = 0; }
+      else         { sw = bgImg.width;  sh = sw / ra; sx = 0; sy = (bgImg.height - sh) / 2; }
+      ctx.drawImage(bgImg, sx, sy, sw, sh, X, 0, RW, H);
+      ctx.fillStyle = 'rgba(4,3,5,0.42)';
+      ctx.fillRect(X, 0, RW, H);
+      ctx.restore();
+    } else {
+      const skyGrad = ctx.createLinearGradient(X, 0, X, H);
+      skyGrad.addColorStop(0, region.palette.sky1);
+      skyGrad.addColorStop(1, region.palette.sky2);
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(X, 0, RW, H);
+      ctx.fillStyle = region.palette.ground;
+      ctx.fillRect(X, H * 0.70, RW, H * 0.30);
+    }
+
+    // Terrain
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(X, 0, RW, H);
+    ctx.clip();
+
+    if (idx === 0) { /* image background */ }
+    else if (idx === 1) { /* image background */ }
+    else if (idx === 2 && abyssImg) { /* image background */ }
+    else if (idx === 2 && !abyssImg) drawAbyss(X, RW, H, region.palette);
+    else if (idx === 3 && !throneImg) drawThrone(X, RW, H, region.palette);
+
+    // Particles (inside clip)
+    if (idx === 0) drawAshParticles(regionParticles[0]);
+    else if (idx === 1) drawDustParticles(regionParticles[1]);
+    else if (idx === 2) drawBioParticles(regionParticles[2]);
+    else if (idx === 3) drawVoidParticles(regionParticles[3]);
+
+    ctx.restore();
+
+    // Subtle dark tint on locked regions
+    if (locked) {
+      ctx.fillStyle = 'rgba(4,3,8,0.45)';
+      ctx.fillRect(regionX(idx), 0, regionW(), canvas.height);
+    }
+
+    // Region label
+    drawRegionLabel(idx, region, locked);
+  });
+
+  drawPath();
+  drawRegionBorders();
+  drawPlayer();
+  drawMapBorder();
+  drawLegend();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UPDATE LOOP
+═══════════════════════════════════════════════════════════════ */
+function update() {
+  time += 0.016;
+
+  // Update particles
+  updateAshParticles(regionParticles[0], 0);
+  updateDustParticles(regionParticles[1], 1);
+  updateBioParticles(regionParticles[2], 2);
+  updateVoidParticles(regionParticles[3], 3);
+  maybeSpawnVoidPulse();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CINEMATIC SYSTEM
+═══════════════════════════════════════════════════════════════ */
+const cinematicOverlay = document.getElementById('cinematic-overlay');
+const cinRegionName    = document.getElementById('cin-region-name');
+const cinFlavor        = document.getElementById('cin-flavor');
+
+function queueCinematics(cinematicsData) {
+  // Find unseen regions where player meets unlock level
+  for (const region of REGIONS) {
+    const regionIdx = REGIONS.indexOf(region);
+    const cinEntry = cinematicsData.find(c => c.region === region.id);
+    if (cinEntry && !cinEntry.seen && playerLevel >= region.unlockLvl) {
+      cinematicQueue.push(regionIdx);
+    }
+  }
+  if (cinematicQueue.length > 0) {
+    playNextCinematic();
+  }
+}
+
+function playNextCinematic() {
+  if (cinematicQueue.length === 0) return;
+  cinematicActive = true;
+  cinematicRegionIdx = cinematicQueue.shift();
+  cinematicStart = performance.now();
+  cinematicBursts = [];
+
+  const region = REGIONS[cinematicRegionIdx];
+  cinRegionName.textContent = region.name;
+  cinFlavor.textContent = region.flavor || '';
+  cinRegionName.style.opacity = '0';
+  cinFlavor.style.opacity = '0';
+  cinRegionName.style.transition = 'none';
+  cinFlavor.style.transition = 'none';
+
+  cinematicOverlay.classList.add('active');
+  cinCanvas.width  = canvas.width;
+  cinCanvas.height = canvas.height;
+}
+
+function spawnCinematicBurst(regionIdx) {
+  const W = canvas.width, H = canvas.height;
+  const X = regionX(regionIdx), RW = regionW();
+  const cx = X + RW / 2, cy = H * 0.5;
+  for (let i = 0; i < 120; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = rand(1.5, 6);
+    cinematicBursts.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - rand(1, 3),
+      r: rand(1, 3),
+      alpha: rand(0.6, 1.0),
+      decay: rand(0.012, 0.025),
+    });
+  }
+}
+
+let burstSpawned = false;
+
+function drawCinematic(now) {
+  if (!cinematicActive) return;
+  const elapsed = (now - cinematicStart) / 1000; // seconds
+  const region = REGIONS[cinematicRegionIdx];
+  const X = regionX(cinematicRegionIdx), W = regionW(), H = canvas.height;
+
+  cinCtx.clearRect(0, 0, cinCanvas.width, cinCanvas.height);
+
+  // Phase 1 (0-2s): Fog sweep reveal
+  if (elapsed < 2.0) {
+    const progress = elapsed / 2.0; // 0→1
+    // Fog covers region, sweeping left to right off
+    const revealX = X + W * progress;
+    // Fill fog over remaining locked area
+    if (revealX < X + W) {
+      const fogGrad = cinCtx.createLinearGradient(revealX - W*0.15, 0, revealX, 0);
+      fogGrad.addColorStop(0, 'rgba(3,3,10,0)');
+      fogGrad.addColorStop(1, region.palette.fog);
+      cinCtx.fillStyle = fogGrad;
+      cinCtx.fillRect(revealX - W*0.15, 0, W*0.15, H);
+      cinCtx.fillStyle = region.palette.fog;
+      cinCtx.fillRect(revealX, 0, (X + W) - revealX, H);
+    }
+  }
+
+  // Phase 2 (2-2.5s): Gold burst
+  if (elapsed >= 2.0 && elapsed < 2.5) {
+    if (!burstSpawned) {
+      burstSpawned = true;
+      spawnCinematicBurst(cinematicRegionIdx);
+    }
+  }
+
+  // Draw burst particles
+  if (elapsed >= 2.0) {
+    for (const p of cinematicBursts) {
+      cinCtx.beginPath();
+      cinCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      cinCtx.fillStyle = `rgba(201,168,76,${Math.max(0, p.alpha)})`;
+      cinCtx.fill();
+    }
+  }
+
+  // Phase 3 (2.5-4s): Region name fade in
+  if (elapsed >= 2.5 && elapsed < 4.0) {
+    const a = Math.min(1, (elapsed - 2.5) / 1.0);
+    cinRegionName.style.transition = 'none';
+    cinRegionName.style.opacity = String(a);
+  } else if (elapsed >= 4.0) {
+    cinRegionName.style.opacity = '1';
+  }
+
+  // Phase 4 (4-5.5s): Flavor text
+  if (elapsed >= 4.0 && elapsed < 5.5) {
+    const a = Math.min(1, (elapsed - 4.0) / 1.0);
+    cinFlavor.style.opacity = String(a);
+  } else if (elapsed >= 5.5) {
+    cinFlavor.style.opacity = '1';
+  }
+
+  // End at 5.5s
+  if (elapsed >= 5.5) {
+    cinematicOverlay.classList.remove('active');
+    cinematicActive = false;
+    burstSpawned = false;
+    cinematicBursts.length = 0;
+    // Mark cinematic as seen
+    fetch('/api/map/cinematic-seen', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ region: region.id }),
+    }).catch(() => {});
+    // Play next if any
+    setTimeout(playNextCinematic, 400);
+  }
+}
+
+function updateCinematicBursts() {
+  for (let i = cinematicBursts.length - 1; i >= 0; i--) {
+    const p = cinematicBursts[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.05; // gravity
+    p.alpha -= p.decay;
+    if (p.alpha <= 0) cinematicBursts.splice(i, 1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN ANIMATION LOOP
+═══════════════════════════════════════════════════════════════ */
+function loop(now) {
+  update();
+  draw();
+  if (cinematicActive) {
+    updateCinematicBursts();
+    drawCinematic(now);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ═══════════════════════════════════════════════════════════════
+   CLICK HANDLER — open drawer
+═══════════════════════════════════════════════════════════════ */
+canvas.addEventListener('click', (e) => {
+  if (cinematicActive) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const rw = regionW();
+  const clickedIdx = Math.min(3, Math.floor(mx / rw));
+  if (clickedIdx === 0) { window.location.href = '/ashen'; return; }
+  openDrawer(clickedIdx);
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAWER
+═══════════════════════════════════════════════════════════════ */
+const drawer         = document.getElementById('drawer');
+const drawerBackdrop = document.getElementById('drawer-backdrop');
+const drawerClose    = document.getElementById('drawer-close');
+const drawerName     = document.getElementById('drawer-region-name');
+const drawerSub      = document.getElementById('drawer-region-subtitle');
+const drawerRange    = document.getElementById('drawer-region-range');
+const drawerBody     = document.getElementById('drawer-body');
+const levelBadge     = document.getElementById('level-badge');
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  drawerBackdrop.classList.remove('open');
+}
+
+drawerClose.addEventListener('click', closeDrawer);
+drawerBackdrop.addEventListener('click', closeDrawer);
+
+function getBossForRegion(regionId) {
+  const keyword = BOSS_REGIONS[regionId];
+  if (!keyword || !mapData) return null;
+  return mapData.bosses.find(b => b.name.toLowerCase().includes(keyword.toLowerCase())) || null;
+}
+
+function getGearForRegion(regionId) {
+  if (!mapData) return [];
+  return mapData.gear.filter(g => g.region === regionId);
+}
+
+function getQuestsForRegion(regionId) {
+  if (!mapData) return [];
+  const tag = QUEST_TAGS[regionId];
+  return mapData.quests.filter(q => q.tag === tag);
+}
+
+function renderBossSection(region) {
+  const boss = getBossForRegion(region.id);
+  let html = `<p class="drawer-section-label">Boss</p>`;
+
+  if (!boss) {
+    html += `<div class="boss-card"><p class="boss-status-none">No boss in this region.</p></div>`;
+    return html;
+  }
+
+  let statusHtml = '';
+  if (boss.status === 'completed') {
+    statusHtml = `<p class="boss-status-done">&#x2714; DEFEATED</p>`;
+  } else if (boss.status === 'active') {
+    statusHtml = `
+      <p class="boss-status-active">&#x2718; Engaged — Active Hunt</p>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar-fill" style="width:65%"></div>
+      </div>`;
+  } else {
+    statusHtml = `<p class="boss-status-notstarted">&#x26A0; Not yet encountered</p>`;
+  }
+
+  html += `
+    <div class="boss-card">
+      <p class="boss-name">${escHtml(boss.name)}</p>
+      ${statusHtml}
+    </div>`;
+  return html;
+}
+
+function renderGearSection(region) {
+  const gear = getGearForRegion(region.id);
+  if (gear.length === 0) return '';
+
+  let html = `<hr class="drawer-divider"><p class="drawer-section-label">Gear</p><div class="gear-row">`;
+  for (const g of gear) {
+    const unlocked = playerLevel >= g.unlock_lvl;
+    const icon = g.type === 'weapon' ? '&#x2694;' : '&#x1F6E1;';
+    html += `
+      <div class="gear-card ${unlocked ? 'unlocked' : 'locked'}">
+        <span class="gear-icon">${icon}</span>
+        <div class="gear-name">${escHtml(g.name)}</div>
+        <div class="gear-type">${escHtml(g.type)}</div>
+        ${!unlocked ? `<div class="gear-lock-overlay">&#x1F512;</div>` : ''}
+      </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function renderQuestsSection(region) {
+  const quests = getQuestsForRegion(region.id);
+  if (quests.length === 0) return '';
+
+  let html = `<hr class="drawer-divider"><p class="drawer-section-label">Quests</p>`;
+  for (const q of quests) {
+    const badgeClass = q.status === 'completed' ? 'completed' : q.status === 'active' ? 'active' : 'inactive';
+    const badgeLabel = q.status === 'completed' ? 'COMPLETED' : q.status === 'active' ? 'ACTIVE' : 'INACTIVE';
+    html += `
+      <div class="quest-item">
+        <div>
+          <div class="quest-name">${escHtml(q.name)}</div>
+          <div class="quest-xp">+${q.xp} XP</div>
+        </div>
+        <span class="quest-badge ${badgeClass}">${badgeLabel}</span>
+      </div>`;
+  }
+  return html;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function openDrawer(regionIdx) {
+  const region = REGIONS[regionIdx];
+  const locked = playerLevel < region.unlockLvl;
+
+  drawerName.textContent  = region.name;
+  drawerSub.textContent   = region.subtitle;
+  drawerRange.textContent = `Level ${region.minLvl} – ${region.maxLvl}`;
+
+  if (locked) {
+    drawerBody.innerHTML = `
+      <div class="drawer-locked">
+        <div class="lock-icon">&#x1F512;</div>
+        <div class="lock-title">REGION LOCKED</div>
+        <div class="lock-msg">This territory remains sealed to you.</div>
+        <div class="lock-level">REACH LEVEL ${region.unlockLvl}</div>
+      </div>`;
+  } else {
+    drawerBody.innerHTML = `
+      <div class="drawer-lore">${escHtml(region.lore)}</div>
+      <hr class="drawer-divider">
+      ${renderBossSection(region)}
+      ${renderGearSection(region)}
+      ${renderQuestsSection(region)}
+    `;
+  }
+
+  drawer.classList.add('open');
+  drawerBackdrop.classList.add('open');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA FETCH
+═══════════════════════════════════════════════════════════════ */
+async function init() {
+  try {
+    const res  = await fetch('/api/map');
+    mapData    = await res.json();
+    playerLevel = mapData.level || 1;
+    levelBadge.textContent = `LVL ${playerLevel}`;
+
+    // Queue cinematics after a short delay
+    setTimeout(() => {
+      if (mapData.cinematics) {
+        queueCinematics(mapData.cinematics);
+      }
+    }, 800);
+  } catch (err) {
+    console.warn('Could not load map data:', err);
+    playerLevel = 1;
+    levelBadge.textContent = 'LVL 1';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

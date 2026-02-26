@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferro Animus — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c878;
+  --gold-dim: #5a3e14;
+  --gold-mid: #8a6828;
+  --bg-deep: #060504;
+  --bg-dark: #0c0a08;
+  --bg-panel: #111009;
+  --bg-panel2: #16130e;
+  --border: #2e2720;
+  --red: #b03020;
+  --red-glow: #ff5544;
+  --text-dim: #5a5040;
+  --text-mid: #9a8e78;
+  --text: #ddd8cc;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 100% 50% at 50% -10%, rgba(90,65,25,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at -10% 60%, rgba(110,75,25,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ── Top Nav ── */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(6,5,4,0.98) 0%, rgba(6,5,4,0.90) 100%);
+  border-bottom: 1px solid var(--gold-dim);
+  display: flex; align-items: center; padding: 0 24px; gap: 0;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+
+#topbar a {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--gold); text-decoration: none;
+  font-size: 10px; letter-spacing: 2px;
+  opacity: 0.7; transition: opacity 0.2s;
+}
+#topbar a:hover { opacity: 1; }
+
+.topbar-divider { width: 1px; height: 20px; background: var(--gold-dim); opacity: 0.5; }
+.topbar-spacer  { flex: 1; }
+
+.topbar-user {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-right: 12px;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  color: var(--text-mid);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── Page content ── */
+.page {
+  position: relative; z-index: 1;
+  max-width: 900px;
+  margin: 100px auto 60px;
+  padding: 0 24px;
+}
+
+.page-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+}
+
+.page-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-bottom: 36px;
+}
+
+.divider-line {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-bottom: 36px;
+}
+
+/* ── Users table ── */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+}
+
+.users-table th {
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+
+.users-table td {
+  padding: 14px 18px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-mid);
+  border-bottom: 1px solid rgba(46,39,32,0.5);
+}
+
+.users-table tr:last-child td { border-bottom: none; }
+
+.users-table tr:hover td { background: rgba(201,168,76,0.02); }
+
+.user-name {
+  color: var(--text);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.badge-admin {
+  display: inline-block;
+  background: rgba(201,168,76,0.12);
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 2px 7px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.xp-value {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.level-value {
+  color: var(--gold-light);
+}
+
+.btn-reset {
+  background: transparent;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reset:hover {
+  background: rgba(176,48,32,0.15);
+  color: var(--red-glow);
+  border-color: var(--red-glow);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-dim);
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-card-value {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 28px;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-card-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="topbar-left">
+    <a href="/">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M2 6.5L8 2L14 6.5V14H10V10H6V14H2V6.5Z" stroke="#c9a84c" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      Dashboard
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/map">🗺 World Map</a>
+  </div>
+  <div class="topbar-spacer"></div>
+  <span class="topbar-user" id="topbar-user"></span>
+  <button class="btn-logout" onclick="logout()">↩ LOGOUT</button>
+</div>
+
+<div class="page">
+  <div class="page-title">ADMIN PANEL</div>
+  <div class="page-sub">The Overseer's Sanctum</div>
+  <hr class="divider-line">
+
+  <div class="stat-cards" id="stat-cards">
+    <div class="stat-card">
+      <div class="stat-card-value" id="total-users">—</div>
+      <div class="stat-card-label">Total Warriors</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value" id="top-xp">—</div>
+      <div class="stat-card-label">Highest XP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-value" id="top-level">—</div>
+      <div class="stat-card-label">Highest Level</div>
+    </div>
+  </div>
+
+  <table class="users-table" id="users-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Level</th>
+        <th>Total XP</th>
+        <th>Joined</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="users-tbody">
+      <tr><td colspan="5" class="empty-state">Loading warriors…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const LEVEL_XP = [0,7300,13300,19300,25300,31300,37300,43300,49300,55300,
+                  61300,67300,73300,79300,85300,91300,97300,103300,109300,115300];
+
+function xpToLevel(xp) {
+  for (let i = LEVEL_XP.length - 1; i >= 0; i--) {
+    if (xp >= LEVEL_XP[i]) return i + 1;
+  }
+  return 1;
+}
+
+function formatDate(unixTs) {
+  if (!unixTs) return '—';
+  return new Date(unixTs * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+async function loadUsers() {
+  try {
+    const res   = await fetch('/api/admin/users');
+    if (!res.ok) { window.location.href = '/'; return; }
+    const users = await res.json();
+
+    document.getElementById('total-users').textContent = users.length;
+
+    if (users.length === 0) {
+      document.getElementById('users-tbody').innerHTML =
+        '<tr><td colspan="5" class="empty-state">No warriors have registered yet.</td></tr>';
+      return;
+    }
+
+    const topXP    = Math.max(...users.map(u => u.total_xp || 0));
+    const topLevel = xpToLevel(topXP);
+    document.getElementById('top-xp').textContent    = topXP.toLocaleString();
+    document.getElementById('top-level').textContent = `LVL ${topLevel}`;
+
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = users.map(u => {
+      const level = xpToLevel(u.total_xp || 0);
+      const adminBadge = u.is_admin ? '<span class="badge-admin">ADMIN</span>' : '';
+      return `
+        <tr>
+          <td><span class="user-name">${escHtml(u.username)}</span>${adminBadge}</td>
+          <td><span class="level-value">LVL ${level}</span></td>
+          <td><span class="xp-value">${(u.total_xp || 0).toLocaleString()} XP</span></td>
+          <td>${formatDate(u.created_at)}</td>
+          <td>
+            <button class="btn-reset" onclick="resetUser(${u.id}, '${escHtml(u.username)}')">
+              ↺ RESET
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    document.getElementById('users-tbody').innerHTML =
+      '<tr><td colspan="5" class="empty-state">Failed to load user data.</td></tr>';
+  }
+}
+
+async function resetUser(id, username) {
+  if (!confirm(`Reset all XP and stats for "${username}"? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`/api/admin/reset-user/${id}`, { method: 'POST' });
+    if (res.ok) loadUsers();
+  } catch (err) {
+    alert('Reset failed. Try again.');
+  }
+}
+
+function logout() {
+  fetch('/api/logout', { method: 'POST' })
+    .then(() => { window.location.href = '/login'; });
+}
+
+function escHtml(str) {
+  return str.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+}
+
+// Init
+fetch('/api/me').then(r => r.json()).then(data => {
+  document.getElementById('topbar-user').textContent = data.username;
+  if (!data.isAdmin) window.location.href = '/';
+}).catch(() => { window.location.href = '/login'; });
+
+loadUsers();
+</script>
+</body>
+</html>

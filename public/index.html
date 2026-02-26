@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferro Animus</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c878;
+  --gold-dim: #5a3e14;
+  --gold-mid: #8a6828;
+  --bg-deep: #060504;
+  --bg-dark: #0c0a08;
+  --bg-panel: #111009;
+  --bg-panel2: #16130e;
+  --border: #2e2720;
+  --red: #b03020;
+  --red-glow: #ff5544;
+  --blue-glow: #c89850;
+  --green: #1e8c50;
+  --green-glow: #3dff8a;
+  --purple-glow: #d4823a;
+  --orange-glow: #e08030;
+  --text-dim: #5a5040;
+  --text-mid: #9a8e78;
+  --text: #ddd8cc;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 100% 50% at 50% -10%, rgba(90,65,25,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at -10% 60%, rgba(110,75,25,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 110% 20%, rgba(70,55,25,0.07) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+canvas#particles {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5;
+}
+
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 36px 20px 100px;
+}
+
+/* ── HEADER ── */
+.masthead { text-align: center; margin-bottom: 40px; }
+.masthead h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(26px, 5vw, 54px);
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 6px;
+  text-shadow: 0 0 24px rgba(201,168,76,.7), 0 0 80px rgba(201,168,76,.2);
+  animation: hPulse 4s ease-in-out infinite;
+}
+@keyframes hPulse {
+  0%,100%{text-shadow:0 0 24px rgba(201,168,76,.7),0 0 80px rgba(201,168,76,.2)}
+  50%{text-shadow:0 0 40px rgba(201,168,76,1),0 0 120px rgba(201,168,76,.4)}
+}
+.masthead-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 13px;
+  letter-spacing: 4px;
+  margin-top: 6px;
+}
+.rule {
+  display: flex; align-items: center; gap: 12px;
+  justify-content: center; margin-top: 18px;
+}
+.rule::before,.rule::after {
+  content:''; height:1px; width:140px;
+  background: linear-gradient(90deg,transparent,var(--gold-dim),transparent);
+}
+.rune { color: var(--gold-dim); font-size: 14px; letter-spacing: 8px; }
+
+/* ── XP INPUT PANEL ── */
+.xp-input-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  padding: 22px 28px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.xp-input-panel::before {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(90deg,transparent,rgba(201,168,76,0.03),transparent);
+  animation: scan 4s linear infinite;
+}
+@keyframes scan { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.xp-input-label {
+  font-size: 10px; letter-spacing: 4px; color: var(--gold);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.xp-input-field {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--gold-light);
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  padding: 8px 14px;
+  width: 180px;
+  text-align: center;
+  letter-spacing: 2px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.xp-input-field:focus {
+  border-color: var(--gold-mid);
+  box-shadow: 0 0 12px rgba(201,168,76,.15);
+}
+.xp-input-field::placeholder { color: var(--text-dim); }
+.btn-add {
+  background: linear-gradient(135deg, #1a1200, #2a1e00);
+  border: 1px solid var(--gold-mid);
+  color: var(--gold-light);
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  padding: 10px 22px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.btn-add:hover {
+  background: linear-gradient(135deg, #2a1e00, #3a2800);
+  box-shadow: 0 0 16px rgba(201,168,76,.2);
+}
+.btn-add:disabled { opacity: .5; cursor: not-allowed; }
+.btn-reset {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  padding: 10px 16px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.btn-reset:hover { border-color: var(--red); color: var(--red-glow); }
+.xp-total-display {
+  margin-left: auto;
+  text-align: right;
+}
+.xp-total-num {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 28px;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(201,168,76,.5);
+}
+.xp-total-label { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-top: 2px; }
+
+/* ── LEVEL CARD ── */
+.level-card {
+  background: linear-gradient(135deg, var(--bg-panel) 0%, #10102a 100%);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  padding: 28px 36px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.level-card::after {
+  content:'';
+  position:absolute; top:0; left:0; right:0;
+  height:1px;
+  background: linear-gradient(90deg,transparent,var(--gold-mid),transparent);
+}
+.lvl-number-wrap { text-align: center; min-width: 100px; }
+.lvl-label { font-size: 9px; letter-spacing: 5px; color: var(--text-dim); margin-bottom: 4px; }
+.lvl-num {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(201,168,76,.9);
+  transition: all .5s;
+  animation: lvlGlow 3s ease-in-out infinite;
+}
+@keyframes lvlGlow {
+  0%,100%{text-shadow:0 0 40px rgba(201,168,76,.9)}
+  50%{text-shadow:0 0 60px rgba(201,168,76,1),0 0 120px rgba(201,168,76,.4)}
+}
+.lvl-title-text {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--gold-light);
+  font-size: 15px;
+  margin-top: 6px;
+  min-height: 22px;
+  transition: opacity .4s;
+}
+.xp-progress { flex: 1; min-width: 260px; }
+.xp-prog-label {
+  display: flex; justify-content: space-between;
+  font-size: 10px; letter-spacing: 3px; color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.xp-bar-track {
+  height: 14px;
+  background: #070710;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5a3a08, var(--gold), #f0d080);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 1.4s cubic-bezier(.25,.46,.45,.94);
+  position: relative;
+}
+.xp-bar-fill::after {
+  content:'';
+  position:absolute;top:0;right:0;bottom:0;width:40px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));
+  animation:glint 2.5s ease-in-out infinite;
+}
+@keyframes glint{0%,100%{opacity:0}50%{opacity:1}}
+.xp-nums {
+  display:flex; justify-content:space-between;
+  margin-top:6px; font-size:11px; color:var(--gold-dim); letter-spacing:1px;
+}
+.class-wrap { text-align:center; min-width:120px; }
+.class-lbl { font-size:9px; letter-spacing:4px; color:var(--text-dim); margin-bottom:6px; }
+.class-icon { font-size:40px; animation:float 3s ease-in-out infinite; }
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.class-name-txt {
+  font-size:12px; letter-spacing:3px; color:var(--purple-glow);
+  text-shadow:0 0 14px var(--purple-glow);
+  margin-top:6px;
+  transition: all .5s;
+}
+
+/* ── PANELS ── */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px; }
+
+.panel {
+  background:var(--bg-panel);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:22px;
+  position:relative;
+  transition: border-color .3s, box-shadow .3s;
+}
+.panel:hover { border-color:var(--gold-dim); }
+.c {
+  position:absolute; width:10px; height:10px;
+  border-color:var(--gold-dim); border-style:solid;
+}
+.c.tl{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.c.tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+.c.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px}
+.c.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+
+.ptitle {
+  font-size:9px; letter-spacing:4px; color:var(--gold);
+  text-transform:uppercase; margin-bottom:18px;
+  display:flex; align-items:center; gap:10px;
+}
+.ptitle::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--gold-dim),transparent); }
+
+/* ── STATS ── */
+.stat-row { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.stat-row:last-child { margin-bottom:0; }
+.s-icon { font-size:18px; width:22px; text-align:center; }
+.s-info { flex:1; }
+.s-name { font-size:9px; letter-spacing:3px; color:var(--text-mid); margin-bottom:5px; }
+.s-track { height:6px; background:#060610; border:1px solid var(--border); border-radius:1px; overflow:hidden; }
+.s-fill {
+  height:100%; border-radius:1px;
+  width:var(--pct,0%);
+  transition:width 1.6s cubic-bezier(.25,.46,.45,.94);
+}
+.s-rank { font-size:14px; font-weight:700; width:26px; text-align:center; }
+
+/* ── QUESTS ── */
+.quest {
+  border:1px solid var(--border); border-radius:3px;
+  padding:14px 16px; margin-bottom:10px;
+  background:var(--bg-panel2);
+  transition: border-color .3s, box-shadow .3s;
+}
+.quest.locked { opacity:.35; filter:grayscale(.7); pointer-events:none; }
+.quest.complete { border-color:var(--green); background:rgba(30,140,80,.04); }
+.quest.boss { border-color:var(--red); background:rgba(176,48,32,.04); }
+.quest.boss.locked { border-color:var(--border); }
+
+.q-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.q-tag {
+  font-size:8px; letter-spacing:3px; padding:2px 8px;
+  border-radius:2px; border:1px solid;
+}
+.q-tag.weekly { color:var(--gold); border-color:var(--gold-dim); background:rgba(201,168,76,.07); }
+.q-tag.boss { color:var(--red-glow); border-color:var(--red); background:rgba(176,48,32,.1); animation:bossFlicker 1.2s ease-in-out infinite; }
+.q-tag.monthly { color:var(--blue-glow); border-color:#1a4a6a; background:rgba(41,128,185,.07); }
+@keyframes bossFlicker{0%,100%{opacity:1}50%{opacity:.6}}
+
+.q-unlock { font-size:9px; letter-spacing:2px; color:var(--red); }
+.q-name { font-size:12px; color:var(--text); letter-spacing:1px; margin-bottom:8px; }
+.q-track { height:4px; background:#060610; border-radius:2px; overflow:hidden; }
+.q-fill { height:100%; border-radius:2px; width:var(--pct,0%); transition:width 1.4s ease; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); }
+.quest.boss .q-fill { background:linear-gradient(90deg,#6a0000,var(--red-glow)); }
+.q-reward { font-size:9px; color:var(--gold-dim); letter-spacing:2px; margin-top:6px; text-align:right; }
+.quest.boss .q-reward { color:rgba(255,85,68,.5); }
+
+/* ── QUEST TABS ── */
+.quest-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  padding: 6px 16px 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .2s;
+  margin-bottom: -1px;
+}
+.quest-tab:hover { color: var(--text-mid); }
+.quest-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ── QUEST ACTIONS ── */
+.q-btn-complete {
+  font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 2px;
+  padding: 5px 10px; border-radius: 2px; cursor: pointer;
+  border: 1px solid var(--green); color: var(--green-glow);
+  background: rgba(30,140,80,.08); transition: all .2s; text-transform: uppercase;
+}
+.q-btn-complete:hover { background: rgba(30,140,80,.2); box-shadow: 0 0 8px rgba(61,255,138,.15); }
+.q-btn-defeat {
+  font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 2px;
+  padding: 5px 10px; border-radius: 2px; cursor: pointer;
+  border: 1px solid var(--gold-mid); color: var(--gold-light);
+  background: rgba(201,168,76,.08); transition: all .2s; text-transform: uppercase;
+}
+.q-btn-defeat:hover { background: rgba(201,168,76,.18); box-shadow: 0 0 8px rgba(201,168,76,.2); }
+.q-btn-delete {
+  font-family: 'Cinzel', serif; font-size: 11px;
+  width: 24px; height: 24px; border-radius: 2px; cursor: pointer;
+  border: 1px solid var(--border); color: var(--text-dim);
+  background: transparent; transition: all .2s; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.q-btn-delete:hover { border-color: var(--red); color: var(--red-glow); }
+
+/* ── QUEST TYPE SELECTOR ── */
+.q-type-btn {
+  flex: 1; font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 2px;
+  padding: 7px 4px; border-radius: 2px; cursor: pointer; text-transform: uppercase;
+  border: 1px solid var(--border); color: var(--text-dim); background: transparent;
+  transition: all .2s;
+}
+.q-type-btn.active { border-color: var(--gold-mid); color: var(--gold); background: rgba(201,168,76,.1); }
+
+/* ── COMPLETED QUEST ── */
+.quest.crossed .q-name { text-decoration: line-through; color: var(--text-dim); }
+
+/* ── CLASSES ── */
+.current-class-card {
+  background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, transparent 60%);
+  border: 1px solid var(--gold-dim);
+  padding: 14px 16px 12px;
+  margin-bottom: 12px;
+}
+.current-class-label {
+  font-size:8px; letter-spacing:4px; color:var(--gold-mid); text-transform:uppercase; margin-bottom:6px;
+}
+.current-class-num {
+  font-size:9px; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; margin-bottom:2px;
+}
+.current-class-name {
+  font-family:'Cinzel Decorative',serif; font-size:17px;
+  color:var(--gold-light);
+  text-shadow:0 0 16px rgba(201,168,76,0.4);
+  letter-spacing:0.04em;
+}
+.title-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  background:var(--bg-panel2);
+  margin-bottom:8px;
+  transition: border-color .3s, background .3s;
+  position: relative; overflow:hidden;
+}
+.title-item:last-child { margin-bottom:0; }
+.title-item.unlocked {
+  border-color:var(--gold-dim);
+  background:linear-gradient(90deg,rgba(201,168,76,.06),transparent);
+}
+.title-item.locked { opacity:.3; }
+.title-item.unlocked::before {
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,var(--gold),transparent);
+}
+.t-icon { font-size:18px; }
+.t-body { flex:1; }
+.t-name {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:14px;
+  color:var(--text-mid);
+}
+.title-item.unlocked .t-name { color:var(--gold-light); text-shadow:0 0 10px rgba(201,168,76,.3); }
+.t-desc { font-size:9px; color:var(--text-dim); letter-spacing:1px; margin-top:2px; }
+.t-lock-badge {
+  font-size:8px; letter-spacing:2px; color:var(--text-dim);
+  border:1px solid var(--border); padding:2px 8px; border-radius:2px;
+  white-space:nowrap;
+}
+.title-item.unlocked .t-lock-badge { color:var(--green-glow); border-color:var(--green); background:rgba(30,140,80,.1); }
+
+/* ── LEVEL UP OVERLAY ── */
+#lvlup-overlay {
+  position:fixed; inset:0; z-index:100;
+  background:rgba(0,0,0,.85);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .4s;
+}
+#lvlup-overlay.show { opacity:1; pointer-events:all; }
+.lvlup-box {
+  text-align:center;
+  border:1px solid var(--gold-mid);
+  background:linear-gradient(135deg,#0a0a18,#15130a);
+  padding:60px 80px;
+  border-radius:4px;
+  position:relative;
+  overflow:hidden;
+}
+.lvlup-box::before {
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%,rgba(201,168,76,.08),transparent 70%);
+  animation:lvlupPulse 1s ease-in-out infinite;
+}
+@keyframes lvlupPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.lvlup-top { font-size:10px; letter-spacing:6px; color:var(--text-dim); margin-bottom:16px; }
+.lvlup-num {
+  font-family:'Cinzel Decorative',serif;
+  font-size:96px;
+  color:var(--gold);
+  text-shadow:0 0 60px rgba(201,168,76,1),0 0 120px rgba(201,168,76,.5);
+  animation:lvlupBounce .6s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes lvlupBounce{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.lvlup-title-reveal {
+  font-family:'IM Fell English',serif;
+  font-style:italic;
+  font-size:22px;
+  color:var(--gold-light);
+  margin-top:8px;
+}
+.lvlup-dismiss {
+  margin-top:32px;
+  font-size:9px; letter-spacing:4px; color:var(--text-dim);
+  border:1px solid var(--border);
+  padding:10px 24px; border-radius:2px;
+  cursor:pointer; background:transparent;
+  font-family:'Cinzel',serif;
+  transition:all .2s;
+}
+.lvlup-dismiss:hover { border-color:var(--gold-dim); color:var(--gold); }
+.lvlup-unlocks { margin-top:20px; font-size:11px; color:var(--green-glow); letter-spacing:2px; min-height:20px; }
+
+/* ── XP LOG ── */
+.xp-log { max-height:120px; overflow-y:auto; }
+.xp-log::-webkit-scrollbar { width:4px; }
+.xp-log::-webkit-scrollbar-track { background:transparent; }
+.xp-log::-webkit-scrollbar-thumb { background:var(--gold-dim); border-radius:2px; }
+.log-entry {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:5px 0;
+  border-bottom:1px solid var(--border);
+  font-size:10px;
+}
+.log-entry:last-child { border-bottom:none; }
+.log-date { color:var(--text-dim); letter-spacing:1px; }
+.log-note { color:var(--text-mid); flex:1; padding:0 12px; font-family:'IM Fell English',serif; font-style:italic; }
+.log-xp { color:var(--gold); letter-spacing:1px; }
+
+/* ── DAY NAV ── */
+.day-nav-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  width: 28px; height: 28px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.day-nav-btn:hover:not(:disabled) { border-color: var(--gold-dim); color: var(--gold); }
+.day-nav-btn:disabled { opacity: .25; cursor: default; }
+
+/* ── DAILY QUEST CARDS ── */
+.dq-card {
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color .3s;
+}
+.dq-card:hover { border-color: var(--gold-dim); }
+.dq-card.dq-done-complete { border-color: var(--green); background: rgba(30,140,80,.05); }
+.dq-card.dq-done-failed   { border-color: var(--border); background: rgba(176,48,32,.03); opacity: .6; }
+.dq-icon { font-size: 22px; }
+.dq-name { font-size: 11px; letter-spacing: 2px; color: var(--text-mid); }
+.dq-name-wrap { display: flex; align-items: center; gap: 6px; flex: 1; }
+.dq-edit-btn {
+  background: none; border: none; padding: 0;
+  color: var(--gold-dim); font-size: 12px; cursor: pointer;
+  opacity: 0; transition: opacity 0.15s;
+  line-height: 1; flex-shrink: 0;
+}
+.dq-name-wrap:hover .dq-edit-btn { opacity: 1; }
+.dq-label-input {
+  font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+  background: rgba(6,5,4,0.9); border: 1px solid var(--gold-dim);
+  color: var(--text); padding: 2px 8px; outline: none;
+  width: 140px;
+}
+.dq-btns { display: flex; gap: 6px; margin-top: 2px; }
+.dq-btn-complete {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 7px 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.dq-btn-complete:hover { border-color: var(--green); color: var(--green-glow); background: rgba(30,140,80,.08); }
+.dq-btn-complete.active {
+  background: rgba(30,140,80,.18);
+  border-color: var(--green-glow);
+  color: var(--green-glow);
+  box-shadow: 0 0 10px rgba(61,255,138,.2);
+}
+.dq-btn-failed {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 7px 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.dq-btn-failed:hover { border-color: var(--red); color: var(--red-glow); }
+.dq-btn-failed.active {
+  background: rgba(176,48,32,.15);
+  border-color: var(--red-glow);
+  color: var(--red-glow);
+}
+
+/* ── ENEMY CARDS ── */
+.enemy-divider {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px;
+  margin: 6px 0 2px;
+  font-size: 9px; letter-spacing: 4px; color: var(--red-glow);
+  text-transform: uppercase;
+}
+.enemy-divider::before, .enemy-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+}
+.dq-card.enemy {
+  border-color: rgba(176,48,32,.4);
+  background: rgba(176,48,32,.04);
+}
+.dq-card.enemy:hover { border-color: var(--red); }
+.dq-card.enemy.dq-done-complete { border-color: var(--gold-dim); background: rgba(201,168,76,.04); }
+.dq-card.enemy.dq-done-failed   { border-color: var(--red); background: rgba(176,48,32,.08); }
+.dq-xp-hint {
+  font-size: 8px; letter-spacing: 1px; color: var(--text-dim);
+  display: flex; gap: 8px;
+}
+.dq-xp-hint span { white-space: nowrap; }
+.dq-btn-defeat {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 7px 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.dq-btn-defeat:hover { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,.08); }
+.dq-btn-defeat.active {
+  background: rgba(201,168,76,.15);
+  border-color: var(--gold);
+  color: var(--gold-light);
+  box-shadow: 0 0 10px rgba(201,168,76,.2);
+}
+.dq-btn-efailed {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 7px 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.dq-btn-efailed:hover { border-color: var(--red); color: var(--red-glow); }
+.dq-btn-efailed.active {
+  background: rgba(176,48,32,.2);
+  border-color: var(--red-glow);
+  color: var(--red-glow);
+  box-shadow: 0 0 10px rgba(255,85,68,.15);
+}
+
+@media(max-width:700px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  .level-card{flex-direction:column;gap:24px}
+  .xp-progress{min-width:100%;width:100%}
+  .xp-input-panel{flex-direction:column;align-items:flex-start}
+  .xp-total-display{margin-left:0}
+}
+
+/* ── CURRENT BOSS PANE ── */
+.boss-pane {
+  margin-bottom: 28px;
+  padding: 0;
+  overflow: hidden;
+  border-color: var(--red);
+  display: flex;
+  align-items: stretch;
+  min-height: 150px;
+}
+.boss-pane-img {
+  width: 130px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.boss-pane-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.boss-pane-img::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; width: 50px;
+  background: linear-gradient(to right, transparent, var(--bg-panel));
+}
+.boss-pane-body {
+  flex: 1;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  position: relative;
+}
+.boss-pane-body::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(176,48,32,0.07), transparent 70%);
+  pointer-events: none;
+}
+.boss-pane-label {
+  font-size: 8px; letter-spacing: 5px;
+  color: var(--red-glow);
+  text-transform: uppercase;
+  animation: bossFlicker 1.4s ease-in-out infinite;
+}
+.boss-pane-name {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 18px;
+  color: var(--text);
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+.boss-pane-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.boss-pane-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+.boss-pane-badge {
+  font-family: 'Cinzel', serif;
+  font-size: 8px; letter-spacing: 3px;
+  padding: 3px 10px;
+  color: var(--red-glow);
+  border: 1px solid var(--red);
+  background: rgba(176,48,32,.12);
+  animation: bossFlicker 1.4s ease-in-out infinite;
+  text-transform: uppercase;
+}
+.boss-pane-link {
+  font-family: 'Cinzel', serif;
+  font-size: 8px; letter-spacing: 3px;
+  color: var(--gold-dim);
+  text-decoration: none;
+  transition: color .2s;
+  text-transform: uppercase;
+}
+.boss-pane-link:hover { color: var(--gold); }
+.boss-pane-hp-wrap {
+  margin-top: 10px;
+  width: 100%;
+}
+.boss-pane-hp-label {
+  display: flex; justify-content: space-between;
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--text-dim); text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.boss-pane-hp-label .hp-val { color: var(--red-glow); font-family: 'Cinzel', serif; }
+.boss-pane-hp-track {
+  height: 6px;
+  background: rgba(6,5,4,0.9);
+  border: 1px solid rgba(176,48,32,0.35);
+  position: relative; overflow: hidden;
+}
+.boss-pane-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6a0000, #b03020, #ff4433);
+  transition: width 1.2s cubic-bezier(.25,.46,.45,.94);
+  position: relative;
+}
+.boss-pane-hp-fill::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; width: 24px;
+  background: linear-gradient(90deg, transparent, rgba(255,100,80,0.5));
+  animation: hpGlint 1.8s ease-in-out infinite;
+}
+@keyframes hpGlint { 0%,100%{opacity:0} 50%{opacity:1} }
+
+/* ── BG ART ── */
+@keyframes runeSpinCW  { to { transform: rotate( 360deg); } }
+@keyframes runeSpinCCW { to { transform: rotate(-360deg); } }
+
+#bg-rune {
+  position: fixed;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 160vmax; height: 160vmax;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.13;
+}
+#bg-rune .rg1 { animation: runeSpinCW  130s linear infinite; transform-origin: 600px 600px; }
+#bg-rune .rg2 { animation: runeSpinCCW  80s linear infinite; transform-origin: 600px 600px; }
+#bg-rune .rg3 { animation: runeSpinCW   48s linear infinite; transform-origin: 600px 600px; }
+
+.side-col {
+  position: fixed; top: 0; bottom: 0;
+  width: 50px; z-index: 0; pointer-events: none;
+  opacity: 0.22;
+}
+#col-left  { left: 0; }
+#col-right { right: 0; }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- NAV -->
+<div id="nav-menu" style="position:fixed;top:20px;left:24px;z-index:10;">
+  <button id="nav-btn" onclick="toggleNav()" style="
+    background:rgba(7,7,16,0.82);border:1px solid var(--gold-dim);border-radius:3px;
+    padding:10px 16px;color:var(--gold);font-family:'Cinzel',serif;font-size:11px;
+    letter-spacing:3px;cursor:pointer;display:flex;align-items:center;gap:8px;
+    backdrop-filter:blur(6px);transition:all .2s;
+  ">☰ MENU</button>
+  <div id="nav-dd" style="display:none;position:absolute;top:calc(100% + 6px);left:0;
+    background:rgba(7,7,16,0.96);border:1px solid var(--gold-dim);border-radius:3px;
+    min-width:170px;backdrop-filter:blur(8px);overflow:hidden;">
+    <a href="/" class="nav-link" style="border-bottom:1px solid var(--border);">⚔ Dashboard</a>
+    <a href="/map" class="nav-link">🗺 World Map</a>
+    <a href="/ashen" class="nav-link" style="border-top:1px solid var(--border);">🏚 The Ashen City</a>
+    <a href="/story" class="nav-link" style="border-top:1px solid var(--border);">📜 The Chronicle</a>
+    <a href="/library" class="nav-link" style="border-top:1px solid var(--border);">📚 The Library</a>
+    <a id="admin-nav-link" href="/admin" class="nav-link" style="display:none;border-top:1px solid var(--border);">⚙ Admin</a>
+    <button onclick="logout()" class="nav-link" style="border-top:1px solid var(--border);background:none;border-left:none;border-right:none;border-bottom:none;border-radius:0;text-align:left;width:100%;cursor:pointer;">↩ Logout</button>
+  </div>
+</div>
+<style>
+.nav-link {
+  display:block;padding:12px 18px;color:var(--text-mid);
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;
+  text-decoration:none;transition:color .2s,background .2s;
+}
+.nav-link:hover { color:var(--gold); background:rgba(201,168,76,.06); }
+</style>
+
+<!-- CLOCK -->
+<div id="clock-pane" style="
+  position: fixed; top: 20px; right: 24px; z-index: 10;
+  background: rgba(7,7,16,0.82);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  padding: 10px 18px 10px 16px;
+  text-align: right;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+">
+  <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+  <div id="clock-time" style="font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gold);text-shadow:0 0 12px rgba(201,168,76,.5);letter-spacing:2px;line-height:1;">00:00:00</div>
+  <div id="clock-date" style="font-family:'IM Fell English',serif;font-style:italic;font-size:11px;color:var(--text-dim);letter-spacing:3px;margin-top:4px;">Mon, Jan 1</div>
+</div>
+
+<!-- BACKGROUND DECO -->
+<svg id="bg-rune" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg"></svg>
+<svg id="col-left"  class="side-col" xmlns="http://www.w3.org/2000/svg"></svg>
+<svg id="col-right" class="side-col" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="masthead">
+    <h1>FERRO ANIMUS</h1>
+    <div class="masthead-sub">The Chronicle of <span id="username-display">—</span></div>
+    <div class="rule"><div class="rune">⟡ ✦ ⟡</div></div>
+  </div>
+
+  <!-- LEVEL CARD -->
+  <div class="level-card">
+    <div class="lvl-number-wrap">
+      <div class="lvl-label">Level</div>
+      <div class="lvl-num" id="lvlNum">1</div>
+      <div class="lvl-title-text" id="lvlTitle">The Trial Begins</div>
+    </div>
+    <div class="xp-progress">
+      <div class="xp-prog-label">
+        <span>Experience</span>
+        <span id="xpPhaseLbl">Trial Period</span>
+      </div>
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" id="xpBar"></div>
+      </div>
+      <div class="xp-nums">
+        <span id="xpCurrent">0 XP</span>
+        <span id="xpNext">1,300 XP to next level</span>
+      </div>
+    </div>
+    <div class="class-wrap">
+      <div class="class-lbl">Class</div>
+      <div class="class-icon" id="classIcon">🌑</div>
+      <div class="class-name-txt" id="className">UNAWAKENED</div>
+    </div>
+  </div>
+
+
+  <!-- CURRENT BOSS -->
+  <div class="panel boss-pane" id="boss-pane" style="display:none;">
+    <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+    <div class="boss-pane-img" id="boss-pane-img-wrap">
+      <img id="boss-pane-img" src="" alt="Current Boss"/>
+    </div>
+    <div class="boss-pane-body">
+      <div class="boss-pane-label">⚠ Current Boss</div>
+      <div class="boss-pane-name" id="boss-pane-name">—</div>
+      <div class="boss-pane-sub" id="boss-pane-sub">—</div>
+      <div class="boss-pane-footer">
+        <span class="boss-pane-badge">Active</span>
+        <a class="boss-pane-link" href="/ashen">Enter Region →</a>
+      </div>
+      <div class="boss-pane-hp-wrap">
+        <div class="boss-pane-hp-label">
+          <span>HP</span>
+          <span class="hp-val" id="boss-pane-hp-val">—</span>
+        </div>
+        <div class="boss-pane-hp-track">
+          <div class="boss-pane-hp-fill" id="boss-pane-hp-fill" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY QUESTS -->
+  <div class="panel" style="margin-bottom:28px;">
+    <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;">⚡ Daily Quests</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="day-nav-btn" onclick="navigateDay(-1)">‹</button>
+        <span id="daily-date-nav" style="font-size:9px;letter-spacing:2px;color:var(--text-mid);min-width:96px;text-align:center;">Today</span>
+        <button class="day-nav-btn" id="btn-day-fwd" onclick="navigateDay(1)" disabled>›</button>
+      </div>
+    </div>
+    <div id="daily-quests-container" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+    <style>#daily-quests-container .enemy-divider { grid-column: 1 / -1; } #daily-quests-container .enemy { grid-column: span 1; }</style>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div id="daily-xp-label" style="font-size:9px;letter-spacing:3px;color:var(--text-dim);">XP Earned Today</div>
+      <div id="daily-xp-today" style="font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gold);text-shadow:0 0 12px rgba(201,168,76,.5)">0</div>
+    </div>
+  </div>
+
+  <!-- STATS + QUESTS -->
+  <div class="grid2">
+
+    <!-- STATS -->
+    <div class="panel">
+      <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+      <div class="ptitle">⚔ Attributes</div>
+
+      <div class="stat-row">
+        <div class="s-icon">💪</div>
+        <div class="s-info">
+          <div class="s-name">Strength — Gym Sessions</div>
+          <div class="s-track"><div class="s-fill" id="stat-str" style="background:linear-gradient(90deg,#7a0000,#ff5544)"></div></div>
+        </div>
+        <div class="s-rank" id="rank-str" style="color:#ff5544">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="s-icon">🧠</div>
+        <div class="s-info">
+          <div class="s-name">Discipline — No Scroll / Alcohol</div>
+          <div class="s-track"><div class="s-fill" id="stat-dis" style="background:linear-gradient(90deg,#4a0080,#c084ff)"></div></div>
+        </div>
+        <div class="s-rank" id="rank-dis" style="color:#c084ff">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="s-icon">💧</div>
+        <div class="s-info">
+          <div class="s-name">Vitality — Water + Calories</div>
+          <div class="s-track"><div class="s-fill" id="stat-vit" style="background:linear-gradient(90deg,#0a3060,#4fc3f7)"></div></div>
+        </div>
+        <div class="s-rank" id="rank-vit" style="color:#4fc3f7">—</div>
+      </div>
+      <div class="stat-row">
+        <div class="s-icon">📚</div>
+        <div class="s-info">
+          <div class="s-name">Wisdom — Books / Courses / Career</div>
+          <div class="s-track"><div class="s-fill" id="stat-wis" style="background:linear-gradient(90deg,#0a4020,#3dff8a)"></div></div>
+        </div>
+        <div class="s-rank" id="rank-wis" style="color:#3dff8a">—</div>
+      </div>
+
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="font-size:8px;letter-spacing:2px;color:var(--text-dim);text-align:center;">Based on last 7 days of daily quests</div>
+      </div>
+    </div>
+
+    <!-- QUESTS -->
+    <div class="panel">
+      <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+
+      <!-- Tab bar -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);">
+        <button class="quest-tab active" id="qtab-active"    onclick="switchQuestTab('active')">Active</button>
+        <button class="quest-tab"        id="qtab-completed" onclick="switchQuestTab('completed')">Completed</button>
+      </div>
+
+      <!-- Active list -->
+      <div id="quest-active-list"></div>
+
+      <!-- Completed list -->
+      <div id="quest-completed-list" style="display:none;max-height:340px;overflow-y:auto;"></div>
+
+      <!-- Add Quest form -->
+      <div id="add-quest-form" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <input id="quest-name-in" type="text" class="xp-input-field"
+               placeholder="Quest name…"
+               style="width:100%;font-size:13px;text-align:left;margin-bottom:8px;letter-spacing:1px;"/>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button class="q-type-btn active" id="qt-weekly"  onclick="setQuestType('weekly')">Weekly</button>
+          <button class="q-type-btn"        id="qt-monthly" onclick="setQuestType('monthly')">Monthly</button>
+          <button class="q-type-btn"        id="qt-boss"    onclick="setQuestType('boss')">⚠ Boss</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="quest-xp-in" type="number" class="xp-input-field" placeholder="XP reward"
+                 style="width:120px;font-size:13px;" min="0"/>
+          <button class="btn-add" style="flex:1;" onclick="submitNewQuest()">Add Quest</button>
+          <button class="btn-reset" onclick="toggleAddQuest()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Add button -->
+      <button id="btn-open-add-quest" onclick="toggleAddQuest()"
+              style="margin-top:14px;width:100%;background:transparent;border:1px dashed var(--border);
+                     color:var(--text-dim);font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;
+                     padding:10px;border-radius:2px;cursor:pointer;transition:all .2s;text-transform:uppercase;"
+              onmouseover="this.style.borderColor='var(--gold-dim)';this.style.color='var(--gold)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">
+        + New Quest
+      </button>
+    </div>
+  </div>
+
+  <!-- TITLES + XP LOG -->
+  <div class="grid2">
+
+    <!-- TITLES -->
+    <div class="panel">
+      <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+      <div class="ptitle">⚔ Class</div>
+      <div id="titles-container"></div>
+    </div>
+
+    <!-- XP LOG -->
+    <div class="panel">
+      <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+      <div class="ptitle">📖 Chronicle Log</div>
+      <div class="xp-log" id="xp-log-list"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:9px;letter-spacing:3px;color:var(--text-dim);">Sessions Recorded</div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gold);text-shadow:0 0 12px rgba(201,168,76,.5)" id="sessionCount">0</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LEVEL UP OVERLAY -->
+<div id="lvlup-overlay" onclick="dismissLevelUp()">
+  <div class="lvlup-box" onclick="event.stopPropagation()">
+    <div class="lvlup-top">LEVEL UP</div>
+    <div class="lvlup-num" id="lvlup-num">2</div>
+    <div class="lvlup-title-reveal" id="lvlup-title"></div>
+    <div class="lvlup-unlocks" id="lvlup-unlocks"></div>
+    <button class="lvlup-dismiss" onclick="dismissLevelUp()">Continue →</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// GAME DATA
+// ══════════════════════════════════════════
+
+const LEVELS = [
+  { level:1,  xp:0,      title:"The Trial Begins",       class:"UNAWAKENED",     icon:"🌑" },
+  { level:2,  xp:7300,   title:"Stirring Embers",        class:"ASPIRANT",       icon:"🔥" },
+  { level:3,  xp:13300,  title:"The Awakening",          class:"ASPIRANT",       icon:"🔥" },
+  { level:4,  xp:19300,  title:"Forged in Habit",        class:"FIGHTER",        icon:"⚔️" },
+  { level:5,  xp:25300,  title:"The Hardened",           class:"FIGHTER",        icon:"⚔️" },
+  { level:6,  xp:31300,  title:"Iron Discipline",        class:"WARRIOR",        icon:"🛡️" },
+  { level:7,  xp:37300,  title:"The Resolute",           class:"WARRIOR",        icon:"🛡️" },
+  { level:8,  xp:43300,  title:"Unyielding",             class:"WARRIOR",        icon:"🛡️" },
+  { level:9,  xp:49300,  title:"The Ascendant",          class:"CHAMPION",       icon:"⚡" },
+  { level:10, xp:55300,  title:"Seasoned Hunter",        class:"CHAMPION",       icon:"⚡" },
+  { level:11, xp:61300,  title:"Beyond Limits",          class:"CHAMPION",       icon:"⚡" },
+  { level:12, xp:67300,  title:"The Relentless",         class:"PARAGON",        icon:"🌟" },
+  { level:13, xp:73300,  title:"Sovereign of Self",      class:"PARAGON",        icon:"🌟" },
+  { level:14, xp:79300,  title:"Walking Storm",          class:"PARAGON",        icon:"🌟" },
+  { level:15, xp:85300,  title:"The Transcendent",       class:"LEGEND",         icon:"👁️" },
+  { level:16, xp:91300,  title:"The Unchained",          class:"LEGEND",         icon:"👁️" },
+  { level:17, xp:97300,  title:"Eternal Flame",          class:"LEGEND",         icon:"👁️" },
+  { level:18, xp:103300, title:"Myth Made Flesh",        class:"LEGEND",         icon:"👁️" },
+  { level:19, xp:109300, title:"The Unstoppable",        class:"SHADOW MONARCH", icon:"👑" },
+  { level:20, xp:115300, title:"Arise",                  class:"SHADOW MONARCH", icon:"👑" },
+];
+
+
+const CLASSES = [
+  { num:1,  name:"Unawakened",       unlockLevel:1  },
+  { num:2,  name:"Challenger",       unlockLevel:2  },
+  { num:3,  name:"Ashborn",          unlockLevel:3  },
+  { num:4,  name:"The Iron Pilgrim", unlockLevel:5  },
+  { num:5,  name:"Last Ember",       unlockLevel:7  },
+  { num:6,  name:"Crimson Hunter",   unlockLevel:9  },
+  { num:7,  name:"Hollow King",      unlockLevel:10 },
+  { num:8,  name:"The Dead Calm",    unlockLevel:12 },
+  { num:9,  name:"Canopy Ghost",     unlockLevel:14 },
+  { num:10, name:"The Eye of Ruin",  unlockLevel:15 },
+  { num:11, name:"The Void Storm",   unlockLevel:16 },
+  { num:12, name:"Shadow Monarch",   unlockLevel:18 },
+  { num:13, name:"The Undying",      unlockLevel:20 },
+];
+
+function getCurrentClass(level) {
+  let cls = CLASSES[0];
+  for (const c of CLASSES) {
+    if (level >= c.unlockLevel) cls = c;
+    else break;
+  }
+  return cls;
+}
+
+const DAILY_QUESTS = [
+  { id: 'calorie', name: 'Calorie Goal',   icon: '🍽️', desc: '+100 XP' },
+  { id: 'macro',   name: 'Macro Goal',     icon: '🥩', desc: '+100 XP' },
+  { id: 'gym',     name: 'Gym Session',    icon: '🏋️', desc: '+100 XP' },
+  { id: 'water',   name: 'Drink 3L Water', icon: '💧', desc: '+100 XP' },
+];
+
+const ENEMY_QUESTS = [
+  { id: 'scroll',   name: 'Doomscrolling',  icon: '📱', defeatXP: 100,  failXP: 0    },
+  { id: 'junkfood', name: 'Junk Food',      icon: '🍔', defeatXP: 0,    failXP: -100 },
+  { id: 'alcohol',  name: 'Alcohol',        icon: '🍺', defeatXP: 0,    failXP: -100 },
+];
+
+function applyQuestLabels(labels) {
+  [...DAILY_QUESTS, ...ENEMY_QUESTS].forEach(q => {
+    if (labels[q.id]) q.name = labels[q.id];
+  });
+}
+
+const RANK_THRESHOLDS = [
+  [0,"F"],[20,"E"],[35,"D"],[50,"C"],[65,"B"],[80,"A"],[95,"S"],
+];
+
+// ══════════════════════════════════════════
+// STATE  (in-memory; persisted via API/SQLite)
+// ══════════════════════════════════════════
+
+let state = { totalXP: 0, log: [], stats: { str:0, dis:0, vit:0, wis:0 }, dailyQuests: {}, quests: { active: [], completed: [] } };
+let questTab    = 'active';
+let newQuestType = 'weekly';
+let viewDate = localDateStr(); // which day the daily quests panel is showing
+
+function localDateStr(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function getDayLabel(dateStr) {
+  const today = localDateStr();
+  const yest  = localDateStr(new Date(Date.now() - 86400000));
+  if (dateStr === today) return 'Today';
+  if (dateStr === yest)  return 'Yesterday';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m-1, d).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+
+async function navigateDay(delta) {
+  const [y, m, d] = viewDate.split('-').map(Number);
+  const next = new Date(y, m-1, d + delta);
+  const nextStr = localDateStr(next);
+  const today = localDateStr();
+  if (nextStr > today) return;
+  viewDate = nextStr;
+  const data = await api(`/api/daily-quests?date=${viewDate}`);
+  state.dailyQuests = data;
+  renderDailyQuests();
+}
+
+// ══════════════════════════════════════════
+// API HELPERS
+// ══════════════════════════════════════════
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ══════════════════════════════════════════
+// LEVEL LOGIC
+// ══════════════════════════════════════════
+
+function getLevelData(xp) {
+  let lvl = LEVELS[0];
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (xp >= LEVELS[i].xp) { lvl = LEVELS[i]; break; }
+  }
+  return lvl;
+}
+
+function getNextLevel(xp) {
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (LEVELS[i].xp > xp) return LEVELS[i];
+  }
+  return null;
+}
+
+function getLevelNum(xp) { return getLevelData(xp).level; }
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+
+async function addXP() {
+  const val = parseInt(document.getElementById('xpIn').value);
+  const note = document.getElementById('noteIn').value.trim() || 'Weekly Update';
+  if (!val || val === 0) return;
+
+  const prevLevel = getLevelNum(state.totalXP);
+
+  const btn = document.getElementById('btnAdd');
+  btn.disabled = true;
+
+  try {
+    const data = await api('/api/xp', {
+      method: 'POST',
+      body: JSON.stringify({ xp: val, note }),
+    });
+    state.totalXP = data.totalXP;
+    state.log = data.log;
+
+    document.getElementById('xpIn').value = '';
+    document.getElementById('noteIn').value = '';
+
+    const newLevel = getLevelNum(state.totalXP);
+    renderAll();
+    if (newLevel > prevLevel) setTimeout(() => showLevelUp(newLevel), 600);
+  } catch (e) {
+    console.error('Failed to add XP', e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  try {
+    await api('/api/reset', { method: 'POST' });
+    state = { totalXP: 0, log: [], stats: { str:0, dis:0, vit:0, wis:0, end:0 } };
+    renderAll();
+  } catch (e) {
+    console.error('Reset failed', e);
+  }
+}
+
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+
+function renderAll() {
+  renderLevel();
+  renderStats();
+  renderQuests();
+  renderTitles();
+  renderLog();
+  renderDailyQuests();
+}
+
+function renderLevel() {
+  const xp = state.totalXP;
+  const lvlData = getLevelData(xp);
+  const nextLvl = getNextLevel(xp);
+  const lvlNum = lvlData.level;
+
+  document.getElementById('lvlNum').textContent = lvlNum;
+  document.getElementById('lvlTitle').textContent = lvlData.title;
+  document.getElementById('classIcon').textContent = lvlData.icon;
+  document.getElementById('className').textContent = lvlData.class;
+
+  if (nextLvl) {
+    const span = nextLvl.xp - lvlData.xp;
+    const earned = xp - lvlData.xp;
+    const pct = Math.min(100, Math.round((earned / span) * 100));
+    document.getElementById('xpBar').style.width = pct + '%';
+    document.getElementById('xpCurrent').textContent = xp.toLocaleString() + ' XP';
+    document.getElementById('xpNext').textContent = (nextLvl.xp - xp).toLocaleString() + ' XP to Level ' + nextLvl.level;
+    document.getElementById('xpPhaseLbl').textContent = 'Level ' + lvlNum + ' → ' + nextLvl.level;
+  } else {
+    document.getElementById('xpBar').style.width = '100%';
+    document.getElementById('xpCurrent').textContent = xp.toLocaleString() + ' XP';
+    document.getElementById('xpNext').textContent = 'MAX LEVEL REACHED';
+    document.getElementById('xpPhaseLbl').textContent = 'Ascendant';
+  }
+}
+
+function renderStats() {
+  const s = state.stats;
+  ['str','dis','vit','wis'].forEach(st => {
+    const val = s[st] || 0;
+    const fill = document.getElementById('stat-' + st);
+    fill.style.setProperty('--pct', val + '%');
+    fill.style.width = val + '%';
+    document.getElementById('rank-' + st).textContent = getRank(val);
+  });
+}
+
+function getRank(val) {
+  let rank = 'F';
+  for (const [thresh, r] of RANK_THRESHOLDS) {
+    if (val >= thresh) rank = r;
+  }
+  return rank;
+}
+
+// ── Quest tab switching ────────────────────────────────────────────────────────
+function switchQuestTab(tab) {
+  questTab = tab;
+  document.getElementById('qtab-active').classList.toggle('active', tab === 'active');
+  document.getElementById('qtab-completed').classList.toggle('active', tab === 'completed');
+  document.getElementById('quest-active-list').style.display    = tab === 'active'    ? '' : 'none';
+  document.getElementById('quest-completed-list').style.display = tab === 'completed' ? '' : 'none';
+  document.getElementById('btn-open-add-quest').style.display   = tab === 'active'    ? '' : 'none';
+}
+
+function setQuestType(type) {
+  newQuestType = type;
+  ['weekly','monthly','boss'].forEach(t => {
+    document.getElementById('qt-' + t).classList.toggle('active', t === type);
+  });
+}
+
+function toggleAddQuest() {
+  const form = document.getElementById('add-quest-form');
+  const open = form.style.display === 'none';
+  form.style.display = open ? '' : 'none';
+  if (open) document.getElementById('quest-name-in').focus();
+}
+
+async function submitNewQuest() {
+  const name = document.getElementById('quest-name-in').value.trim();
+  const xp   = parseInt(document.getElementById('quest-xp-in').value) || 0;
+  if (!name) return;
+  const data = await api('/api/quests', {
+    method: 'POST',
+    body: JSON.stringify({ name, tag: newQuestType, xp }),
+  });
+  state.quests = { active: data.active, completed: data.completed };
+  document.getElementById('quest-name-in').value = '';
+  document.getElementById('quest-xp-in').value = '';
+  document.getElementById('add-quest-form').style.display = 'none';
+  renderQuests();
+}
+
+async function completeQuest(id) {
+  const prevLevel = getLevelNum(state.totalXP);
+  const data = await api(`/api/quests/${id}/complete`, { method: 'POST' });
+  state.totalXP = data.totalXP;
+  state.log     = data.log;
+  if (data.stats) state.stats = data.stats;
+  state.quests  = { active: data.active, completed: data.completed };
+  renderAll();
+  const newLevel = getLevelNum(state.totalXP);
+  if (newLevel > prevLevel) setTimeout(() => showLevelUp(newLevel), 600);
+}
+
+async function deleteQuest(id) {
+  const data = await api(`/api/quests/${id}`, { method: 'DELETE' });
+  state.quests = { active: data.active, completed: data.completed };
+  renderQuests();
+}
+
+function renderQuests() {
+  const activeEl    = document.getElementById('quest-active-list');
+  const completedEl = document.getElementById('quest-completed-list');
+  activeEl.innerHTML = '';
+  completedEl.innerHTML = '';
+
+  // ── Active quests ──
+  if (state.quests.active.length === 0) {
+    activeEl.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:10px 0;font-family:\'IM Fell English\',serif;font-style:italic;">No active quests. Add one below.</div>';
+  } else {
+    state.quests.active.forEach(q => {
+      const isBoss = q.tag === 'boss';
+      const div = document.createElement('div');
+      div.className = 'quest' + (isBoss ? ' boss' : '');
+      div.innerHTML = `
+        <div class="q-head">
+          <div class="q-tag ${q.tag}">${isBoss ? '⚠ BOSS' : q.tag.toUpperCase()}</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${isBoss
+              ? `<button class="q-btn-defeat" onclick="completeQuest(${q.id})">⚔ Defeat</button>`
+              : `<button class="q-btn-complete" onclick="completeQuest(${q.id})">✓ Complete</button>`}
+            <button class="q-btn-delete" onclick="deleteQuest(${q.id})">×</button>
+          </div>
+        </div>
+        <div class="q-name">${q.name}</div>
+        <div class="q-reward">+${q.xp.toLocaleString()} XP</div>
+      `;
+      activeEl.appendChild(div);
+    });
+  }
+
+  // ── Completed quests ──
+  if (state.quests.completed.length === 0) {
+    completedEl.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:10px 0;font-family:\'IM Fell English\',serif;font-style:italic;">No completed quests yet.</div>';
+  } else {
+    state.quests.completed.forEach(q => {
+      const isBoss = q.tag === 'boss';
+      const date   = q.completed_at
+        ? new Date(q.completed_at * 1000).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+        : '';
+      const div = document.createElement('div');
+      div.className = 'quest crossed' + (isBoss ? ' boss' : '') + ' complete';
+      div.style.opacity = '0.55';
+      div.innerHTML = `
+        <div class="q-head">
+          <div class="q-tag ${q.tag}">${isBoss ? '⚠ BOSS' : q.tag.toUpperCase()}</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:9px;letter-spacing:1px;color:var(--text-dim);">${date}</span>
+            <button class="q-btn-delete" onclick="deleteQuest(${q.id})">×</button>
+          </div>
+        </div>
+        <div class="q-name" style="text-decoration:line-through;">${q.name}</div>
+        <div class="q-reward" style="color:var(--green-glow);">+${q.xp.toLocaleString()} XP earned</div>
+      `;
+      completedEl.appendChild(div);
+    });
+  }
+}
+
+function renderTitles() {
+  const lvl = getLevelNum(state.totalXP);
+  const current = getCurrentClass(lvl);
+  const container = document.getElementById('titles-container');
+  container.innerHTML = '';
+
+  // Current class card
+  const card = document.createElement('div');
+  card.className = 'current-class-card';
+  card.innerHTML = `
+    <div class="current-class-label">Current Class</div>
+    <div class="current-class-num">Class ${current.num}</div>
+    <div class="current-class-name">${current.name}</div>
+  `;
+  container.appendChild(card);
+
+  CLASSES.forEach(c => {
+    const past    = lvl > c.unlockLevel;
+    const active  = c.num === current.num;
+    const locked  = lvl < c.unlockLevel;
+    const div = document.createElement('div');
+    div.className = 'title-item ' + (locked ? 'locked' : 'unlocked');
+    div.innerHTML = `
+      <div class="t-icon" style="font-size:13px;min-width:22px;text-align:center;color:var(--text-dim);">${active ? '▶' : past ? '✓' : '·'}</div>
+      <div class="t-body">
+        <div class="t-name" style="${active ? 'color:var(--gold);' : ''}">${c.name}</div>
+        <div class="t-desc">Class ${c.num}</div>
+      </div>
+      <div class="t-lock-badge" style="${active ? 'color:var(--amber);border-color:var(--amber);' : ''}">${active ? 'CURRENT' : locked ? 'LVL ' + c.unlockLevel : 'PASSED'}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderLog() {
+  const list = document.getElementById('xp-log-list');
+  list.innerHTML = '';
+  if (state.log.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:var(--text-dim);letter-spacing:2px;padding:10px 0;font-family:\'IM Fell English\',serif;font-style:italic;">No entries yet. Add your first XP to begin the chronicle.</div>';
+  } else {
+    state.log.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `
+        <div class="log-date">${entry.date}</div>
+        <div class="log-note">${entry.note}</div>
+        <div class="log-xp" style="color:${entry.xp < 0 ? 'var(--red-glow)' : 'var(--gold)'}">${entry.xp > 0 ? '+' : ''}${entry.xp.toLocaleString()}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('sessionCount').textContent = state.log.length;
+}
+
+// ══════════════════════════════════════════
+// DAILY QUESTS
+// ══════════════════════════════════════════
+
+function renderDailyQuests() {
+  const container = document.getElementById('daily-quests-container');
+
+  // Update nav label + forward button state
+  const today = localDateStr();
+  document.getElementById('daily-date-nav').textContent = getDayLabel(viewDate);
+  document.getElementById('btn-day-fwd').disabled = (viewDate >= today);
+  document.getElementById('daily-xp-label').textContent = viewDate === today ? 'XP Earned Today' : `XP Earned — ${getDayLabel(viewDate)}`;
+
+  container.innerHTML = '';
+  let xpToday = 0;
+
+  // ── Regular daily quests ──
+  DAILY_QUESTS.forEach(q => {
+    const result = state.dailyQuests[q.id];
+    const currentStatus = result ? result.status : null;
+    const card = document.createElement('div');
+    card.className = 'dq-card' + (currentStatus === 'completed' ? ' dq-done-complete' : currentStatus === 'failed' ? ' dq-done-failed' : '');
+
+    if (currentStatus === 'completed') xpToday += 100;
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="dq-icon">${q.icon}</div>
+        <div class="dq-name-wrap">
+          <span class="dq-name" id="qlabel-${q.id}">${q.name}</span>
+          <button class="dq-edit-btn" onclick="startEditLabel('${q.id}')" title="Rename">✎</button>
+        </div>
+        <div style="font-size:8px;letter-spacing:1px;color:var(--gold-dim);">${q.desc}</div>
+      </div>
+      <div class="dq-btns">
+        <button class="dq-btn-complete${currentStatus === 'completed' ? ' active' : ''}"
+                onclick="markDailyQuest('${q.id}','completed')">✓ Done</button>
+        <button class="dq-btn-failed${currentStatus === 'failed' ? ' active' : ''}"
+                onclick="markDailyQuest('${q.id}','failed')">✗ Failed</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // ── Enemy divider ──
+  const divider = document.createElement('div');
+  divider.className = 'enemy-divider';
+  divider.innerHTML = '⚠ Enemies';
+  container.appendChild(divider);
+
+  // ── Enemy quests ──
+  ENEMY_QUESTS.forEach(q => {
+    const result = state.dailyQuests[q.id];
+    const currentStatus = result ? result.status : null;
+    const card = document.createElement('div');
+    card.className = 'dq-card enemy' + (currentStatus === 'completed' ? ' dq-done-complete' : currentStatus === 'failed' ? ' dq-done-failed' : '');
+
+    if (currentStatus === 'completed') xpToday += q.defeatXP;
+    if (currentStatus === 'failed')    xpToday += q.failXP;
+
+    const defeatLabel = q.defeatXP > 0 ? `+${q.defeatXP} XP` : '0 XP';
+    const failLabel   = q.failXP < 0   ? `${q.failXP} XP`   : '0 XP';
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="dq-icon">${q.icon}</div>
+        <div class="dq-name-wrap">
+          <span class="dq-name" id="qlabel-${q.id}">${q.name}</span>
+          <button class="dq-edit-btn" onclick="startEditLabel('${q.id}')" title="Rename">✎</button>
+        </div>
+      </div>
+      <div class="dq-xp-hint">
+        <span style="color:var(--gold-dim)">⚔ ${defeatLabel}</span>
+        <span style="color:var(--red)">✗ ${failLabel}</span>
+      </div>
+      <div class="dq-btns">
+        <button class="dq-btn-defeat${currentStatus === 'completed' ? ' active' : ''}"
+                onclick="markDailyQuest('${q.id}','completed')">⚔ Defeated</button>
+        <button class="dq-btn-efailed${currentStatus === 'failed' ? ' active' : ''}"
+                onclick="markDailyQuest('${q.id}','failed')">✗ Failed</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  document.getElementById('daily-xp-today').textContent = xpToday;
+}
+
+async function markDailyQuest(questId, status) {
+  const prevLevel = getLevelNum(state.totalXP);
+  try {
+    const data = await api('/api/daily-quests', {
+      method: 'POST',
+      body: JSON.stringify({ questId, status, date: viewDate }),
+    });
+    state.totalXP = data.totalXP;
+    state.log = data.log;
+    if (data.stats) state.stats = data.stats;
+    state.dailyQuests[questId] = { status, xp: data.xpAwarded };
+    renderAll();
+    const newLevel = getLevelNum(state.totalXP);
+    if (newLevel > prevLevel) setTimeout(() => showLevelUp(newLevel), 600);
+  } catch (e) {
+    console.error('Failed to mark quest', e);
+  }
+}
+
+// ══════════════════════════════════════════
+// LEVEL UP OVERLAY
+// ══════════════════════════════════════════
+
+function showLevelUp(newLevel) {
+  const lvlData = LEVELS.find(l => l.level === newLevel) || LEVELS[newLevel - 1];
+  document.getElementById('lvlup-num').textContent = newLevel;
+  document.getElementById('lvlup-title').textContent = lvlData ? lvlData.title : '';
+
+  const newClass = CLASSES.find(c => c.unlockLevel === newLevel);
+  const msg = newClass ? `⚔ Class unlocked: ${newClass.name}` : '';
+  document.getElementById('lvlup-unlocks').textContent = msg;
+
+  document.getElementById('lvlup-overlay').classList.add('show');
+  spawnLevelUpParticles();
+}
+
+function dismissLevelUp() {
+  document.getElementById('lvlup-overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════
+
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let W, H;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+
+class Particle {
+  constructor(x, y, burst) {
+    this.x = x || Math.random() * W;
+    this.y = y || Math.random() * H;
+    this.burst = burst || false;
+    this.r = burst ? (1 + Math.random() * 3) : (Math.random() * 1.5);
+    this.vx = burst ? (Math.random() - .5) * 6 : (Math.random() - .5) * .2;
+    this.vy = burst ? (-Math.random() * 5) : (Math.random() - .5) * .2;
+    this.alpha = burst ? 1 : Math.random() * .4 + .1;
+    this.decay = burst ? .015 : .001;
+    this.color = burst
+      ? `hsl(${30 + Math.random() * 25}, 75%, ${50 + Math.random() * 30}%)`
+      : Math.random() > 0.25
+        ? `rgba(${170 + Math.random() * 60},${160 + Math.random() * 50},${140 + Math.random() * 40},`  // ash grey
+        : `rgba(${180 + Math.random() * 50},${110 + Math.random() * 40},${20 + Math.random() * 20},`;  // amber ember
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.burst) this.vy += .1;
+    this.alpha -= this.decay;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.burst ? this.color : this.color + this.alpha + ')';
+    ctx.globalAlpha = this.alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+// ── Stars ──────────────────────────────────────────────────────────
+class Star {
+  constructor() { this.reset(); }
+  reset() {
+    this.x     = Math.random() * window.innerWidth;
+    this.y     = Math.random() * window.innerHeight;
+    this.r     = 0.3 + Math.random() * 1.6;
+    this.base  = 0.1 + Math.random() * 0.55;
+    this.phase = Math.random() * Math.PI * 2;
+    this.speed = 0.4 + Math.random() * 1.2;
+    // Mostly white/blue-white, occasional warm gold
+    const roll = Math.random();
+    this.color = roll > 0.88
+      ? `rgba(240,210,120,` // warm gold
+      : roll > 0.72
+      ? `rgba(180,210,255,` // cool blue-white
+      : `rgba(220,220,255,`; // neutral white
+  }
+  draw(t) {
+    const a = this.base + Math.sin(t * this.speed + this.phase) * (this.base * 0.7);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.color + Math.max(0, a) + ')';
+    ctx.fill();
+    // Bright stars get a subtle cross-glint
+    if (this.r > 1.3 && a > this.base) {
+      ctx.strokeStyle = this.color + (a * 0.4) + ')';
+      ctx.lineWidth = 0.4;
+      const gl = this.r * 3;
+      ctx.beginPath(); ctx.moveTo(this.x - gl, this.y); ctx.lineTo(this.x + gl, this.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(this.x, this.y - gl); ctx.lineTo(this.x, this.y + gl); ctx.stroke();
+    }
+  }
+}
+
+const STAR_COUNT = 180;
+const stars = Array.from({ length: STAR_COUNT }, () => new Star());
+window.addEventListener('resize', () => stars.forEach(s => s.reset()));
+
+let starTime = 0;
+
+function spawnLevelUpParticles() {
+  const cx = W / 2, cy = H / 2;
+  for (let i = 0; i < 120; i++) particles.push(new Particle(cx, cy, true));
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  starTime += 0.016;
+  stars.forEach(s => s.draw(starTime));
+  particles = particles.filter(p => p.alpha > 0);
+  particles.forEach(p => { p.update(); p.draw(); });
+  while (particles.filter(p => !p.burst).length < 60) particles.push(new Particle());
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ══════════════════════════════════════════
+// KEYBOARD
+// ══════════════════════════════════════════
+
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+
+function toggleNav() {
+  const dd = document.getElementById('nav-dd');
+  dd.style.display = dd.style.display === 'none' ? '' : 'none';
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('nav-menu').contains(e.target))
+    document.getElementById('nav-dd').style.display = 'none';
+});
+
+// ══════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════
+
+function tickClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock-time').textContent = `${hh}:${mm}:${ss}`;
+  document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+  });
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// ══════════════════════════════════════════
+// BACKGROUND ART
+// ══════════════════════════════════════════
+
+function buildBgArt() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const cx = 600, cy = 600;
+
+  function mkEl(tag, attrs, parent) {
+    const e = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  function poly(n, r, offsetDeg = -90) {
+    return Array.from({ length: n }, (_, i) => {
+      const a = (i * 360 / n + offsetDeg) * Math.PI / 180;
+      return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`;
+    }).join(' ');
+  }
+
+  // ── Runic circle ──────────────────────────────────────────────────
+  const rune = document.getElementById('bg-rune');
+
+  // g1: Outer tick ring — rotates CW slowly
+  const g1 = mkEl('g', { class: 'rg1' }, rune);
+  mkEl('circle', { cx, cy, r: 540, fill:'none', stroke:'#c9a84c', 'stroke-width':'1.5' }, g1);
+  mkEl('circle', { cx, cy, r: 548, fill:'none', stroke:'#c9a84c', 'stroke-width':'0.5', opacity:'0.4' }, g1);
+  for (let i = 0; i < 72; i++) {
+    const a = (i * 5 - 90) * Math.PI / 180;
+    const isMaj = i % 6 === 0, isMed = i % 3 === 0;
+    const r2 = isMaj ? 506 : isMed ? 522 : 531;
+    mkEl('line', {
+      x1: cx + 540*Math.cos(a), y1: cy + 540*Math.sin(a),
+      x2: cx + r2 *Math.cos(a), y2: cy + r2 *Math.sin(a),
+      stroke:'#c9a84c', 'stroke-width': isMaj ? '2' : '0.8',
+    }, g1);
+    if (isMaj) {
+      const ra = 494, d = 5;
+      const dx = cx + ra*Math.cos(a), dy = cy + ra*Math.sin(a);
+      mkEl('rect', { x:dx-d, y:dy-d, width:d*2, height:d*2,
+        fill:'#c9a84c', opacity:'0.65',
+        transform:`rotate(45,${dx},${dy})` }, g1);
+    }
+  }
+
+  // g2: Polygon ring — rotates CCW
+  const g2 = mkEl('g', { class: 'rg2' }, rune);
+  mkEl('circle',  { cx, cy, r: 430, fill:'none', stroke:'#c9a84c', 'stroke-width':'0.8', opacity:'0.5' }, g2);
+  mkEl('polygon', { points: poly(12, 430), fill:'none', stroke:'#c9a84c', 'stroke-width':'0.7', opacity:'0.3' }, g2);
+  mkEl('polygon', { points: poly(3, 430, -90), fill:'none', stroke:'#d4823a', 'stroke-width':'0.9', opacity:'0.3' }, g2);
+  mkEl('polygon', { points: poly(3, 430,  90), fill:'none', stroke:'#d4823a', 'stroke-width':'0.9', opacity:'0.3' }, g2);
+  // Arc notches at each dodecagon vertex
+  for (let i = 0; i < 12; i++) {
+    const a = (i * 30 - 90) * Math.PI / 180;
+    const rx = cx + 415*Math.cos(a), ry = cy + 415*Math.sin(a);
+    mkEl('circle', { cx: rx, cy: ry, r: 4, fill:'none', stroke:'#c9a84c', 'stroke-width':'1', opacity:'0.5' }, g2);
+  }
+
+  // g3: Inner tick ring — rotates CW faster
+  const g3 = mkEl('g', { class: 'rg3' }, rune);
+  mkEl('circle',  { cx, cy, r: 310, fill:'none', stroke:'#c9a84c', 'stroke-width':'1.2', opacity:'0.7' }, g3);
+  mkEl('polygon', { points: poly(8, 310), fill:'none', stroke:'#c9a84c', 'stroke-width':'0.8', opacity:'0.45' }, g3);
+  for (let i = 0; i < 48; i++) {
+    const a = (i * 7.5 - 90) * Math.PI / 180;
+    const isMaj = i % 6 === 0;
+    const r2 = isMaj ? 288 : 300;
+    mkEl('line', {
+      x1: cx + 310*Math.cos(a), y1: cy + 310*Math.sin(a),
+      x2: cx + r2 *Math.cos(a), y2: cy + r2 *Math.sin(a),
+      stroke:'#c9a84c', 'stroke-width': isMaj ? '1.5' : '0.6',
+    }, g3);
+  }
+
+  // g4: Inner core — stationary
+  const g4 = mkEl('g', {}, rune);
+  mkEl('circle',  { cx, cy, r: 175, fill:'none', stroke:'#d4823a', 'stroke-width':'1', opacity:'0.45' }, g4);
+  mkEl('circle',  { cx, cy, r: 162, fill:'none', stroke:'#c9a84c', 'stroke-width':'0.5', opacity:'0.3' }, g4);
+  mkEl('polygon', { points: poly(3, 175, -90), fill:'none', stroke:'#d4823a', 'stroke-width':'0.9', opacity:'0.4' }, g4);
+  mkEl('polygon', { points: poly(3, 175,  90), fill:'none', stroke:'#d4823a', 'stroke-width':'0.9', opacity:'0.4' }, g4);
+  mkEl('line', { x1:cx, y1:cy-175, x2:cx, y2:cy+175, stroke:'#c9a84c', 'stroke-width':'0.5', opacity:'0.22' }, g4);
+  mkEl('line', { x1:cx-175, y1:cy, x2:cx+175, y2:cy, stroke:'#c9a84c', 'stroke-width':'0.5', opacity:'0.22' }, g4);
+  mkEl('circle', { cx, cy, r: 38, fill:'none', stroke:'#c9a84c', 'stroke-width':'1', opacity:'0.55' }, g4);
+  mkEl('circle', { cx, cy, r: 7,  fill:'#c9a84c', opacity:'0.5' }, g4);
+
+  // ── Side columns ─────────────────────────────────────────────────
+  function buildCol(id) {
+    const colEl = document.getElementById(id);
+    const h = window.innerHeight;
+    colEl.setAttribute('width',  '50');
+    colEl.setAttribute('height', h);
+    colEl.setAttribute('viewBox', `0 0 50 ${h}`);
+    colEl.innerHTML = '';
+    const x = 25, spacing = 80;
+    // Main line
+    mkEl('line', { x1:x, y1:0, x2:x, y2:h, stroke:'#c9a84c', 'stroke-width':'1', opacity:'0.55' }, colEl);
+    // Thin offset line
+    mkEl('line', { x1:x+5, y1:60, x2:x+5, y2:h-60, stroke:'#c9a84c', 'stroke-width':'0.5', opacity:'0.2' }, colEl);
+    let y = 50, i = 0;
+    while (y < h - 40) {
+      if (i % 4 === 0) {
+        const d = 5;
+        mkEl('rect', { x:x-d, y:y-d, width:d*2, height:d*2,
+          fill:'#c9a84c', opacity:'0.65', transform:`rotate(45,${x},${y})` }, colEl);
+        mkEl('line', { x1:x-14, y1:y, x2:x+14, y2:y, stroke:'#c9a84c', 'stroke-width':'0.7', opacity:'0.28' }, colEl);
+      } else {
+        const tl = i % 2 === 0 ? 9 : 4;
+        mkEl('line', { x1:x-tl, y1:y, x2:x+tl, y2:y, stroke:'#c9a84c', 'stroke-width':'0.8', opacity:'0.38' }, colEl);
+      }
+      y += spacing / 4;
+      i++;
+    }
+  }
+
+  buildCol('col-left');
+  buildCol('col-right');
+  window.addEventListener('resize', () => {
+    buildCol('col-left');
+    buildCol('col-right');
+  });
+}
+
+// ══════════════════════════════════════════
+// INIT — load state from server then render
+// ══════════════════════════════════════════
+
+const BOSS_IMAGES = {
+  'ashen-1': '/boss-ashen-1.png',
+};
+
+function startEditLabel(questId) {
+  const span = document.getElementById('qlabel-' + questId);
+  if (!span) return;
+  const current = span.textContent;
+  const input = document.createElement('input');
+  input.className = 'dq-label-input';
+  input.value = current;
+  input.maxLength = 60;
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+
+  async function save() {
+    const newLabel = input.value.trim() || current;
+    await api('/api/quest-labels/' + questId, { method: 'PATCH', body: JSON.stringify({ label: newLabel }) });
+    // Update the in-memory array so re-renders stay updated
+    const all = [...DAILY_QUESTS, ...ENEMY_QUESTS];
+    const q = all.find(q => q.id === questId);
+    if (q) q.name = newLabel;
+    renderDailyQuests();
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { renderDailyQuests(); } // cancel
+  });
+  input.addEventListener('blur', save);
+}
+
+function logout() {
+  fetch('/api/logout', { method: 'POST' }).then(() => { window.location.href = '/login'; });
+}
+
+async function initApp() {
+  buildBgArt();
+
+  // Load username and show admin link if applicable
+  try {
+    const me = await fetch('/api/me').then(r => r.ok ? r.json() : null);
+    if (!me) { window.location.href = '/login'; return; }
+    document.getElementById('username-display').textContent = me.username;
+    document.title = `Ferro Animus — ${me.username}'s Chronicle`;
+    if (me.isAdmin) document.getElementById('admin-nav-link').style.display = '';
+  } catch (e) { window.location.href = '/login'; return; }
+
+  try {
+    const [data, dailyQuests, quests, mapData, questLabels] = await Promise.all([
+      api('/api/state'),
+      api(`/api/daily-quests?date=${viewDate}`),
+      api('/api/quests'),
+      api('/api/map'),
+      api('/api/quest-labels'),
+    ]);
+    applyQuestLabels(questLabels);
+    state = { ...data, dailyQuests, quests };
+
+    // Populate current boss pane
+    const regionBosses = mapData.regionBosses || [];
+    const activeBoss = regionBosses.find(b => b.status === 'active');
+    if (activeBoss) {
+      const imgKey = `${activeBoss.region}-${activeBoss.level_req}`;
+      const imgSrc = BOSS_IMAGES[imgKey];
+      document.getElementById('boss-pane-name').textContent = activeBoss.name;
+      document.getElementById('boss-pane-sub').textContent  = activeBoss.subtitle;
+      if (imgSrc) {
+        document.getElementById('boss-pane-img').src = imgSrc;
+        document.getElementById('boss-pane-img-wrap').style.display = '';
+      } else {
+        document.getElementById('boss-pane-img-wrap').style.display = 'none';
+      }
+      // HP bar: inverse of XP progress through boss's level
+      const totalXp = data.totalXP || 0;
+      const bossLvl = activeBoss.level_req;
+      const startXp = LEVELS.find(l => l.level === bossLvl)?.xp ?? 0;
+      const endXp   = LEVELS.find(l => l.level === bossLvl + 1)?.xp ?? (startXp + 6000);
+      const hp = totalXp <= startXp ? 100
+               : totalXp >= endXp   ? 0
+               : Math.round((1 - (totalXp - startXp) / (endXp - startXp)) * 100);
+      document.getElementById('boss-pane-hp-val').textContent  = `${hp}% HP`;
+      document.getElementById('boss-pane-hp-fill').style.width = `${hp}%`;
+      document.getElementById('boss-pane').style.display = '';
+    }
+  } catch (e) {
+    console.error('Failed to load state from server', e);
+  }
+  renderAll();
+}
+
+initApp();
+</script>
+</body>
+</html>

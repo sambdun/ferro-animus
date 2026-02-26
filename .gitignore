@@ -1,0 +1,5 @@
+node_modules/
+solo_leveling.db
+*.db-shm
+*.db-wal
+.env

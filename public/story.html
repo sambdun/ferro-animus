@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Chronicle — Ferro Animus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c878;
+      --gold-dim: #5a3e14;
+      --gold-mid: #8a6828;
+      --bg-deep: #060504;
+      --bg-dark: #0c0a08;
+      --bg-panel: #111009;
+      --bg-panel2: #16130e;
+      --border: #2e2720;
+      --red: #b03020;
+      --red-glow: #ff5544;
+      --amber: #d4823a;
+      --text-dim: #5a5040;
+      --text-mid: #9a8e78;
+      --text: #ddd8cc;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Cinzel', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    /* ── TOP NAV ── */
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 52px;
+      background: linear-gradient(180deg, rgba(6,5,4,0.98) 0%, rgba(6,5,4,0.92) 100%);
+      border-bottom: 1px solid var(--gold-dim);
+      display: flex; align-items: center; padding: 0 20px; gap: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    #topbar a {
+      display: flex; align-items: center; gap: 7px;
+      color: var(--gold); text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.1em;
+      opacity: 0.8; transition: opacity 0.2s; white-space: nowrap;
+    }
+    #topbar a:hover { opacity: 1; }
+    .topbar-divider { width: 1px; height: 20px; background: var(--gold-dim); opacity: 0.5; }
+    .topbar-spacer { flex: 1; }
+    .btn-logout {
+      background: transparent; border: 1px solid var(--gold-dim);
+      color: var(--text-mid); font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 2px; padding: 5px 12px;
+      cursor: pointer; transition: all 0.2s; margin-left: 12px;
+    }
+    .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+    #level-badge {
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.12em;
+      color: var(--gold); border: 1px solid var(--gold-dim); padding: 4px 14px;
+    }
+
+    /* ── PAGE HERO ── */
+    #hero {
+      padding: 140px 24px 72px;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 8px;
+      color: var(--gold-dim); text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(28px, 6vw, 56px);
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-shadow:
+        0 0 30px rgba(201,168,76,0.7),
+        0 0 80px rgba(201,168,76,0.25);
+      margin-bottom: 18px;
+      line-height: 1.1;
+    }
+    .hero-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: var(--text-dim);
+    }
+
+    /* ── MAIN COLUMN ── */
+    #chronicle {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 24px 120px;
+    }
+
+    /* ── CHAPTER ── */
+    .chapter { margin-bottom: 72px; position: relative; }
+
+    .chapter-header { margin-bottom: 40px; }
+
+    .chapter-part-label {
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 6px;
+      color: var(--gold-dim); text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .chapter-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(18px, 4vw, 28px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+    .chapter-unlock-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 3px;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      padding: 4px 12px;
+      text-transform: uppercase;
+      background: rgba(201,168,76,0.05);
+    }
+
+    .chapter-divider {
+      display: flex; align-items: center; gap: 14px;
+      margin: 32px 0;
+    }
+    .chapter-divider .line {
+      height: 1px; flex: 1;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+    .chapter-divider .diamond {
+      width: 6px; height: 6px;
+      background: var(--gold-dim);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* ── PROSE ── */
+    .prose { display: flex; flex-direction: column; gap: 24px; }
+
+    .prose p {
+      font-family: 'IM Fell English', serif;
+      font-size: 18px;
+      line-height: 1.9;
+      color: var(--text-mid);
+      letter-spacing: 0.01em;
+    }
+    .prose p.opening {
+      font-size: 20px;
+      color: var(--text);
+      line-height: 1.85;
+    }
+    .prose p.dialogue {
+      font-style: italic;
+      color: var(--text);
+      padding-left: 24px;
+      border-left: 2px solid var(--gold-dim);
+    }
+    .prose p.beat {
+      font-style: italic;
+      color: var(--text);
+      font-size: 19px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── EPILOGUE ── */
+    .chapter-epilogue {
+      margin-top: 48px;
+      padding: 28px 32px;
+      background: var(--bg-panel2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      position: relative; overflow: hidden;
+    }
+    .chapter-epilogue::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, transparent, var(--red), transparent);
+    }
+    .epilogue-label {
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 4px;
+      color: var(--red-glow); text-transform: uppercase;
+      margin-bottom: 14px;
+      animation: flicker 1.6s ease-in-out infinite;
+    }
+    @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:.55} }
+    .epilogue-text {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 16px; line-height: 1.8;
+      color: var(--text-mid);
+    }
+    .epilogue-text strong { color: var(--text); font-style: normal; }
+
+    /* ── LOCKED CHAPTER ── */
+    .chapter-locked-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 32px 36px;
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      position: relative; overflow: hidden;
+    }
+    .chapter-locked-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.01) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .locked-icon {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .locked-info { flex: 1; }
+    .locked-part-label {
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 5px;
+      color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .locked-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(14px, 3vw, 20px);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+    .locked-condition {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--text-dim); opacity: 0.65;
+    }
+    .locked-badge {
+      align-self: center;
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 3px;
+      padding: 4px 12px; text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Spacing divider between chapters */
+    .chapter-sep {
+      display: flex; align-items: center; gap: 18px;
+      margin: 56px 0;
+    }
+    .chapter-sep .line {
+      height: 1px; flex: 1;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+    .chapter-sep .glyph {
+      font-size: 14px; color: var(--text-dim); opacity: 0.4;
+      letter-spacing: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Nav ── -->
+<div id="topbar">
+  <div class="topbar-left">
+    <a href="/map">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8L10 13" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      World Map
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M2 6.5L8 2L14 6.5V14H10V10H6V14H2V6.5Z" stroke="#c9a84c" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      Dashboard
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/ashen">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M3 2h8l2 2v11H3V2z" stroke="#c9a84c" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M6 6h5M6 9h5M6 12h3" stroke="#c9a84c" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+      Ashen City
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/library">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M2 3h3v10H2zM6 3h3v10H6zM10 3h4v10h-4z" stroke="#c9a84c" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      Library
+    </a>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div id="level-badge">LVL —</div>
+  <button class="btn-logout" onclick="logout()">↩ LOGOUT</button>
+</div>
+
+<!-- ── Page Hero ── -->
+<div id="hero">
+  <div class="hero-eyebrow">Ashen City — DLC I</div>
+  <h1 class="hero-title">The Chronicle</h1>
+  <p class="hero-sub">Each victory writes the next page.</p>
+</div>
+
+<!-- ── Chronicle ── -->
+<div id="chronicle">
+
+  <!-- ═══════════════════════════════════════════
+       PART I — THE ARRIVAL (always unlocked)
+  ═══════════════════════════════════════════ -->
+  <div class="chapter" id="part-1">
+    <div class="chapter-header">
+      <div class="chapter-part-label">Part I</div>
+      <div class="chapter-title">The Arrival</div>
+      <div class="chapter-unlock-tag">
+        <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="#c9a84c" stroke-width="1.3"/>
+          <path d="M8 5v4l2.5 1.5" stroke="#c9a84c" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        Level 1 · No boss defeated yet
+      </div>
+    </div>
+
+    <div class="chapter-divider">
+      <div class="line"></div><div class="diamond"></div><div class="line"></div>
+    </div>
+
+    <div class="prose">
+      <p class="opening">They said the city had a name once.</p>
+
+      <p>Before the ash. Before the silence settled into the streets like a second cobblestone,
+      grey and permanent and patient. Before the fires that never fully died retreated into the
+      walls and the pipes and the bones of the buildings themselves, burning quietly from within
+      like a secret too old to speak aloud.</p>
+
+      <p>You arrived the way everyone arrives at the places that matter — with nothing.</p>
+
+      <p>No memory of the road that brought you here. No clear recollection of the moment the
+      skyline first appeared on the horizon, those impossible brutalist towers clawing upward
+      through the haze like fingers of a buried giant refusing to let go. Only the vague and
+      unsettling sense that you had been walking toward this place your entire life without
+      knowing it. That every soft choice, every avoided mirror, every morning you turned over
+      and chose the comfortable dark over the difficult light — all of it had been slow
+      navigation toward these gates.</p>
+
+      <p>The gates are iron. Enormous. Bent slightly inward at the top as though something on
+      the other side once pressed against them with tremendous force and then thought better of
+      it. Rust blooms across the surface in patterns that almost resemble faces if you look too
+      long. You do not look too long.</p>
+
+      <p>A figure sits beside the gate on an overturned concrete block. Old. Wrapped in so many
+      layers of salvaged cloth that their shape is suggestion rather than fact. They do not look
+      up as you approach.</p>
+
+      <p class="dialogue">"Another one," they say. Not unkindly. The way someone says <em>it has started raining.</em></p>
+      <p class="dialogue">"Is this the city?" you ask.</p>
+      <p class="dialogue">"It's what's left of one."</p>
+
+      <p>You look up at the towers. Somewhere near the top of the tallest one a single amber
+      window glows. You cannot tell if it is fire or something worse.</p>
+
+      <p class="dialogue">"What happened here?"</p>
+
+      <p>The figure finally looks up. Their eyes are the color of old smoke.</p>
+
+      <p class="dialogue">"Same thing that happens everywhere. People stopped trying. Stopped pushing. Stopped
+      becoming. A city is only alive as long as the people in it are. When they go still —
+      really still, inside — the city follows."</p>
+
+      <p>They gesture at the ash drifting from a sky you cannot see the top of.</p>
+
+      <p class="dialogue">"This is what still looks like from the outside."</p>
+
+      <p>You stand at the gate for a long time.</p>
+
+      <p class="beat">Then you push it open.<br>The city breathes in.</p>
+
+      <p>The first district they call the Dead Quarter. Not because nothing lives there — things
+      live there, in the walls and the shadows and the flooded basement corridors where
+      rust-stained water never drains. But because everything that lives there has forgotten
+      what living was supposed to feel like. They move through the grey streets like people
+      rehearsing being people.</p>
+
+      <p>You walk among them and feel a terror you cannot immediately name.</p>
+
+      <p>Then you name it.</p>
+
+      <p class="beat">Recognition.</p>
+
+      <p>You have been one of them. Not here — not in this city, not in this ash. But somewhere.
+      In your own version of the Dead Quarter. The grey routine. The comfortable decay. The days
+      that passed without resistance because you offered none.</p>
+
+      <p>At the center of the Dead Quarter stands a building still upright, still proud — an old
+      gymnasium, the sign above the door barely legible through grime. Inside through ash-caked
+      windows you can see figures moving. Training. Lifting. Running in place. In the grey
+      stillness of the Dead Quarter this building pulses like a second heartbeat.</p>
+
+      <p>You do not think about it.</p>
+
+      <p class="beat">You push the door open and go inside.</p>
+
+      <p>That night, walking back through streets that smell of cold iron and old ambition, you
+      feel something watching you from the deep ruins at the far end of the district. Ancient.
+      Patient. Assembled from the wreckage of a thousand abandoned things. You feel it the way
+      you feel weather coming — in your joints, in the back of your throat, in the particular
+      stillness that settles over the street when something large and old decides to pay
+      attention.</p>
+
+      <p>The people around you feel it too. They move faster. Look at the ground. Make themselves
+      small the way prey animals make themselves small when something apex passes nearby.</p>
+
+      <p>You are the only one who looks toward the deep ruins. Something there — vast, concrete,
+      amber-eyed — looks back.</p>
+
+      <p class="beat">You hold its gaze until it looks away first.<br>Then you go to sleep.</p>
+    </div>
+
+    <div class="chapter-epilogue">
+      <div class="epilogue-label">⚠ Ahead</div>
+      <p class="epilogue-text">
+        Welcome to the Ashen City, Wanderer. The Dead Quarter holds its breath. Something old has opened one eye.<br><br>
+        <strong>The Scavenger King</strong> waits in the deep ruins. He is as old as the city's first abandonment —
+        built from the rubble of every collapsed ambition, every fallen resolution, every tower that was started
+        and never finished. He has felt your footsteps and measured their intention. He does not think you are serious.<br><br>
+        He has been wrong before — rarely — and each time it cost him.<br><br>
+        <em>He is about to be wrong again.</em><br><br>
+        Defeat him. Show the city what serious looks like.
+      </p>
+    </div>
+  </div>
+
+  <div class="chapter-sep">
+    <div class="line"></div><div class="glyph">✦ ✦ ✦</div><div class="line"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PART II — THE DEAD QUARTER FALLS
+       Locked until: Scavenger King defeated / Level 2
+  ═══════════════════════════════════════════ -->
+  <div class="chapter" id="part-2">
+
+    <!-- LOCKED STATE -->
+    <div id="part-2-locked">
+      <div class="chapter-locked-card">
+        <div class="locked-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="1" stroke="#5a5040" stroke-width="1.3"/>
+            <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#5a5040" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="locked-info">
+          <div class="locked-part-label">Part II</div>
+          <div class="locked-title">The Dead Quarter Falls</div>
+          <div class="locked-condition">Unlocks after defeating The Scavenger King</div>
+        </div>
+        <div class="locked-badge">Locked</div>
+      </div>
+    </div>
+
+    <!-- UNLOCKED STATE (hidden until condition met) -->
+    <div id="part-2-content" style="display:none;">
+      <div class="chapter-header">
+        <div class="chapter-part-label">Part II</div>
+        <div class="chapter-title">The Dead Quarter Falls</div>
+        <div class="chapter-unlock-tag">
+          <svg width="9" height="9" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.5" stroke="#c9a84c" stroke-width="1.3"/>
+            <path d="M8 5v4l2.5 1.5" stroke="#c9a84c" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Level 2 · The Scavenger King has been defeated
+        </div>
+      </div>
+
+      <div class="chapter-divider">
+        <div class="line"></div><div class="diamond"></div><div class="line"></div>
+      </div>
+
+      <div class="prose">
+        <p class="opening">The fight lasted longer than you expected and ended more quietly than you feared.</p>
+
+        <p>That is the thing nobody tells you about the Scavenger King — the stories make him
+        sound like a force of nature, a colossus, something you survive rather than defeat. And
+        the size of him is real, the weight of him is real, the sheer accumulated density of
+        everything he is made from pressing down on you like the city itself deciding to sit on
+        your chest.</p>
+
+        <p>But the ending.</p>
+
+        <p class="beat">The ending was almost gentle.</p>
+
+        <p>You landed the last blow — not with the blade, not with anything physical, but with
+        the particular refusal to stop that had been building in you since the moment you pushed
+        through the iron gates. The refusal that looked like one more training session when
+        everything hurt. That looked like one more correct choice when the wrong one was right
+        there and easy. That looked like getting up at the exact moment the city's grey comfort
+        was loudest, was most seductive, was practically singing you back to horizontal.</p>
+
+        <p>That refusal, accumulated over days, swung like a weapon heavier than anything the
+        ruins could have built.</p>
+
+        <p>And the Scavenger King — lord of the rubble, sovereign of every abandoned thing,
+        ancient beyond memory — simply came apart.</p>
+
+        <p>Not explosively. The pieces of him found their way back to the ground they came from.
+        Slowly. The hospital wall section, still faintly marked with its room number, settled
+        back into the rubble field with a sound like a sigh. The subway platform section, yellow
+        safety line still visible, laid itself down like something finally resting. The rebar
+        tendons unwound and curled on the broken concrete. The amber light in those enormous
+        eyes dimmed the way fires dim — gradually, without drama, making the surrounding
+        darkness briefly more noticeable before your eyes adjusted.</p>
+
+        <p>What remained when he was fully settled was a small amber vial. Warm in the ash.
+        Glowing with the slow patient pulse of something alive.</p>
+
+        <p>You picked it up and held it in your palm for a long time.</p>
+
+        <p class="beat">One hard day, bottled.</p>
+
+        <p>You understood then what you had actually defeated. Not a monster — not exactly. The
+        Scavenger King was the physical manifestation of the city's primary mechanism of
+        self-defense. The city does not want to change. Cities built from abandoned ambition
+        never do. They protect their stasis the way living things protect their lives, and the
+        Scavenger King was that protection made colossal and ancient and amber-eyed.</p>
+
+        <p class="beat">You had not just beaten a boss.</p>
+        <p class="beat">You had told the city what you were.</p>
+
+        <p>The rubble settled for three days after. Small tremors. Dust falling from ceilings.
+        The people of the Dead Quarter pausing in their grey routines and tilting their heads at
+        a sound or sensation just below their ability to name. Something structural and invisible
+        had shifted. A weight lifted from the district's chest that it had carried so long it
+        had stopped registering as weight and started registering as normal.</p>
+
+        <p>On the second day an old woman pressed a key into your hand outside the gymnasium.
+        Iron. Heavy. The number 4 stamped into the bow.</p>
+
+        <p class="dialogue">"Top floor," she said. "Been locked since before I got here."</p>
+
+        <p>On the third day the tremors stopped and the Ember Markets opened their gates to you
+        for the first time. The merchant with iron-grey hair and hammer hands pressed a second
+        amber vial into your palm without being asked.</p>
+
+        <p class="dialogue">"The city noticed," she said simply.</p>
+        <p class="dialogue">"Is that good?"</p>
+
+        <p>She smiled with the economy of someone who has learned not to waste expression.</p>
+
+        <p class="dialogue">"It means the harder tests are coming."</p>
+
+        <p>That evening by a fire in the Ember Markets an old trader leaned toward you with the
+        deliberate movement of someone about to say something that cost them something to say.
+        He held up four fingers. Then he pointed toward the northern reach of the Dead Quarter
+        where the buildings pressed together so tightly the streets had become tunnels, where
+        the flickering lights were always the wrong color, cold and blue-grey and institutional,
+        and the ground was always damp and the air always carried the smell of iron left too
+        long in standing water.</p>
+
+        <p class="dialogue">"The Scavenger King was the city's first question," he said. "The Warden of the Rust
+        is its second. And the Warden does not ask loudly."</p>
+
+        <p>You looked toward the northern reach. The wrong-colored lights. The silence that was
+        somehow thicker than the silence elsewhere.</p>
+
+        <p class="dialogue">"What does it ask?"</p>
+
+        <p>The trader stared into the fire.</p>
+
+        <p class="dialogue">"Whether you can hold yourself together when nothing is coming at you. When there is
+        no colossus to fight. When the threat is just — presence. Weight. A thing that stands
+        in the water and waits and makes you feel like you were never getting out."</p>
+
+        <p>He poked the fire. Sparks rose.</p>
+
+        <p class="dialogue">"Most people," he said, "find that harder."</p>
+      </div>
+
+      <div class="chapter-epilogue">
+        <div class="epilogue-label">⚠ Ahead</div>
+        <p class="epilogue-text">
+          The Dead Quarter has changed. You can feel it in the way it looks at you now — not with
+          indifference but with something closer to attention.<br><br>
+          <strong>The Warden of the Rust</strong> waits in the northern reach. He does not come at you.
+          He does not have to. He stands in the water and lets the silence do the work — lets it press
+          against the parts of you that are still uncertain, still afraid, still asking
+          whether you deserve to be here.<br><br>
+          <em>Answer the question. Then go find him.</em>
+        </p>
+      </div>
+    </div><!-- /#part-2-content -->
+
+  </div><!-- /#part-2 -->
+
+  <div class="chapter-sep">
+    <div class="line"></div><div class="glyph">✦ ✦ ✦</div><div class="line"></div>
+  </div>
+
+  <!-- PART III — LOCKED -->
+  <div class="chapter" id="part-3">
+    <div id="part-3-locked">
+      <div class="chapter-locked-card">
+        <div class="locked-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="1" stroke="#5a5040" stroke-width="1.3"/>
+            <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#5a5040" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="locked-info">
+          <div class="locked-part-label">Part III</div>
+          <div class="locked-title">???</div>
+          <div class="locked-condition">Unlocks at Level 3</div>
+        </div>
+        <div class="locked-badge">Locked</div>
+      </div>
+    </div>
+    <div id="part-3-content" style="display:none;"></div>
+  </div>
+
+  <div class="chapter-sep">
+    <div class="line"></div><div class="glyph">✦ ✦ ✦</div><div class="line"></div>
+  </div>
+
+  <!-- PART IV — LOCKED -->
+  <div class="chapter" id="part-4">
+    <div id="part-4-locked">
+      <div class="chapter-locked-card">
+        <div class="locked-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="1" stroke="#5a5040" stroke-width="1.3"/>
+            <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#5a5040" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="locked-info">
+          <div class="locked-part-label">Part IV</div>
+          <div class="locked-title">???</div>
+          <div class="locked-condition">Unlocks at Level 4</div>
+        </div>
+        <div class="locked-badge">Locked</div>
+      </div>
+    </div>
+    <div id="part-4-content" style="display:none;"></div>
+  </div>
+
+  <div class="chapter-sep">
+    <div class="line"></div><div class="glyph">✦ ✦ ✦</div><div class="line"></div>
+  </div>
+
+  <!-- PART V — LOCKED -->
+  <div class="chapter" id="part-5">
+    <div id="part-5-locked">
+      <div class="chapter-locked-card">
+        <div class="locked-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="1" stroke="#5a5040" stroke-width="1.3"/>
+            <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#5a5040" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="locked-info">
+          <div class="locked-part-label">Part V</div>
+          <div class="locked-title">???</div>
+          <div class="locked-condition">Unlocks at Level 5</div>
+        </div>
+        <div class="locked-badge">Locked</div>
+      </div>
+    </div>
+    <div id="part-5-content" style="display:none;"></div>
+  </div>
+
+</div><!-- /#chronicle -->
+
+<script>
+'use strict';
+
+function logout() {
+  fetch('/api/logout', { method: 'POST' }).then(() => { window.location.href = '/login'; });
+}
+
+function revealChapter(partId) {
+  const locked  = document.getElementById(partId + '-locked');
+  const content = document.getElementById(partId + '-content');
+  if (locked)  locked.style.display  = 'none';
+  if (content) content.style.display = 'block';
+}
+
+async function init() {
+  try {
+    const res  = await fetch('/api/map');
+    const data = await res.json();
+    const level = data.level || 1;
+
+    document.getElementById('level-badge').textContent = `LVL ${level}`;
+
+    const regionBosses = data.regionBosses || [];
+
+    const scavengerKing = regionBosses.find(b => b.region === 'ashen' && b.level_req === 1);
+    const kingDefeated  = scavengerKing && scavengerKing.status === 'defeated';
+
+    // Part II: Scavenger King defeated (or level 2+)
+    if (kingDefeated || level >= 2) revealChapter('part-2');
+
+    // Parts III–V: by level
+    if (level >= 3) revealChapter('part-3');
+    if (level >= 4) revealChapter('part-4');
+    if (level >= 5) revealChapter('part-5');
+
+  } catch (e) {
+    console.warn('Could not load story data:', e);
+    document.getElementById('level-badge').textContent = 'LVL 1';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

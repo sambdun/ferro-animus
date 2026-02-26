@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ashen City — DLC I</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c878;
+      --gold-dim: #5a3e14;
+      --gold-mid: #8a6828;
+      --bg-deep: #060504;
+      --bg-dark: #0c0a08;
+      --bg-panel: #111009;
+      --bg-panel2: #16130e;
+      --border: #2e2720;
+      --red: #b03020;
+      --red-glow: #ff5544;
+      --amber: #d4823a;
+      --green: #1e8c50;
+      --green-glow: #3dff8a;
+      --text-dim: #5a5040;
+      --text-mid: #9a8e78;
+      --text: #ddd8cc;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: 'Cinzel', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    /* ══════════════════════════════════════
+       TOP NAV BAR
+    ══════════════════════════════════════ */
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 52px;
+      background: linear-gradient(180deg, rgba(6,5,4,0.98) 0%, rgba(6,5,4,0.92) 100%);
+      border-bottom: 1px solid var(--gold-dim);
+      display: flex; align-items: center; padding: 0 20px; gap: 0;
+    }
+
+    .topbar-left {
+      display: flex; align-items: center; gap: 16px;
+    }
+
+    #topbar a {
+      display: flex; align-items: center; gap: 7px;
+      color: var(--gold); text-decoration: none;
+      font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.1em;
+      opacity: 0.8; transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    #topbar a:hover { opacity: 1; }
+    #topbar a svg { flex-shrink: 0; }
+
+    .topbar-divider {
+      width: 1px; height: 20px;
+      background: var(--gold-dim);
+      opacity: 0.5;
+    }
+
+    .topbar-spacer { flex: 1; }
+    .btn-logout {
+      background: transparent; border: 1px solid var(--gold-dim);
+      color: var(--text-mid); font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 2px; padding: 5px 12px;
+      cursor: pointer; transition: all 0.2s; margin-left: 12px;
+    }
+    .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+    #level-badge {
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.12em;
+      color: var(--gold); border: 1px solid var(--gold-dim);
+      padding: 4px 14px;
+    }
+
+    /* ══════════════════════════════════════
+       HERO SECTION — Region title
+    ══════════════════════════════════════ */
+    #hero {
+      position: relative;
+      height: 100vh;
+      background-image: url('/ashen-city.png');
+      background-size: cover;
+      background-position: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(6,5,4,0.3) 0%,
+        rgba(6,5,4,0.65) 60%,
+        rgba(6,5,4,1) 100%
+      );
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 0 24px;
+    }
+
+    .hero-dlc {
+      font-family: 'Cinzel', serif;
+      font-size: 11px; letter-spacing: 8px;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(32px, 7vw, 64px);
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+      text-shadow:
+        0 0 30px rgba(201,168,76,0.8),
+        0 0 70px rgba(201,168,76,0.4),
+        0 0 120px rgba(201,168,76,0.15);
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .hero-levels {
+      font-family: 'Cinzel', serif;
+      font-size: 13px; letter-spacing: 4px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .ornament-rule {
+      display: flex; align-items: center; gap: 14px;
+      justify-content: center;
+      margin-bottom: 28px;
+      width: 100%; max-width: 500px;
+    }
+    .ornament-rule .line {
+      height: 1px; flex: 1;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+    .ornament-rule .diamond {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(201,168,76,0.6);
+    }
+
+    .hero-lore {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 16px; line-height: 1.75;
+      color: var(--text-mid);
+      max-width: 600px;
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: absolute; bottom: 36px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: var(--text-dim); font-size: 9px; letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .scroll-hint .arrow {
+      width: 18px; height: 18px;
+      border-right: 1px solid var(--gold-dim);
+      border-bottom: 1px solid var(--gold-dim);
+      transform: rotate(45deg);
+      animation: bounce 1.8s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.5; }
+      50%       { transform: rotate(45deg) translateY(6px); opacity: 1; }
+    }
+
+    /* ══════════════════════════════════════
+       BOSS SPOTLIGHT — Below hero
+    ══════════════════════════════════════ */
+    #boss-spotlight {
+      background: var(--bg-deep);
+      position: relative; z-index: 1;
+      display: flex;
+      align-items: stretch;
+      min-height: 520px;
+      max-height: 85vh;
+      overflow: hidden;
+    }
+
+    /* Left: blurred ashen bg + boss image */
+    .boss-spotlight-visual {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #030302;
+    }
+
+    .boss-spotlight-bg {
+      position: absolute; inset: 0;
+      background-image: url('/ashen-city.png');
+      background-size: cover;
+      background-position: center;
+      filter: blur(10px) brightness(0.15) saturate(0.3);
+      transform: scale(1.05);
+    }
+
+    .boss-spotlight-img {
+      position: relative; z-index: 1;
+      max-height: 78vh;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      filter:
+        drop-shadow(0 0 60px rgba(0,0,0,1))
+        drop-shadow(0 20px 40px rgba(0,0,0,0.9));
+      padding: 32px 24px;
+    }
+
+    /* Right edge fade on visual side */
+    .boss-spotlight-visual::after {
+      content: '';
+      position: absolute; top: 0; right: 0; bottom: 0; width: 80px;
+      background: linear-gradient(to right, transparent, var(--bg-deep));
+      z-index: 2;
+    }
+
+    /* Right: boss info panel */
+    .boss-spotlight-info {
+      width: 320px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 40px 48px 20px;
+      position: relative;
+    }
+
+    .boss-spotlight-label {
+      font-size: 8px; letter-spacing: 5px;
+      color: var(--red-glow);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      animation: bossFlicker 1.4s ease-in-out infinite;
+    }
+
+    .boss-spotlight-name {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(20px, 3vw, 32px);
+      color: var(--text);
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .boss-spotlight-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--text-mid);
+      margin-bottom: 28px;
+    }
+
+    .boss-spotlight-divider {
+      width: 40px; height: 1px;
+      background: var(--gold-dim);
+      margin-bottom: 24px;
+    }
+
+    .boss-spotlight-level {
+      font-size: 9px; letter-spacing: 4px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .boss-spotlight-level span {
+      color: var(--amber);
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 15px;
+      letter-spacing: 2px;
+    }
+
+    /* ══════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════ */
+    #content {
+      background: var(--bg-deep);
+      position: relative; z-index: 1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    /* Section divider */
+    .section-divider {
+      display: flex; align-items: center; gap: 14px;
+      justify-content: center;
+      margin: 48px 0;
+    }
+    .section-divider .line {
+      height: 1px; flex: 1;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+    .section-divider .diamond {
+      width: 7px; height: 7px;
+      background: var(--gold-dim);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* Section header */
+    .section-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 4px;
+      color: var(--gold-mid);
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    /* ══════════════════════════════════════
+       SECTION A — CURRENT STATUS
+    ══════════════════════════════════════ */
+    .status-cards {
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+
+    .status-card {
+      flex: 1; min-width: 200px;
+      background: var(--bg-panel2);
+      border: 1px solid var(--border);
+      padding: 28px 24px;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .status-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,76,0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .status-card-level-num {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 56px; font-weight: 700;
+      color: var(--amber);
+      line-height: 1;
+      text-shadow:
+        0 0 20px rgba(212,130,58,0.7),
+        0 0 50px rgba(212,130,58,0.3);
+      margin-bottom: 10px;
+    }
+    .status-card-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 4px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    /* XP bar card */
+    .xp-card-inner {
+      width: 100%;
+    }
+    .xp-card-total {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 28px; color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .xp-card-sublabel {
+      font-size: 9px; letter-spacing: 3px;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+    .xp-bar-wrap {
+      background: rgba(6,5,4,0.8);
+      border: 1px solid var(--gold-dim);
+      height: 10px;
+      position: relative; overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .xp-bar-fill {
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim) 0%, var(--gold) 60%, var(--gold-light) 100%);
+      transition: width 0.8s ease;
+      animation: xp-shimmer 2.5s linear infinite;
+    }
+    @keyframes xp-shimmer {
+      0%   { filter: brightness(1); }
+      50%  { filter: brightness(1.35); }
+      100% { filter: brightness(1); }
+    }
+    .xp-bar-labels {
+      display: flex; justify-content: space-between;
+      font-size: 9px; color: var(--text-dim); letter-spacing: 1px;
+    }
+    .xp-bar-threshold {
+      font-size: 9px; color: var(--gold-dim); letter-spacing: 2px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* ══════════════════════════════════════
+       SECTION B — REGION LORE
+    ══════════════════════════════════════ */
+    .lore-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold-dim);
+      padding: 28px 32px;
+      position: relative; overflow: hidden;
+    }
+    .lore-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, transparent, var(--gold-dim), transparent);
+    }
+    .lore-text {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 16px; line-height: 1.8;
+      color: var(--text-mid);
+    }
+
+    /* ══════════════════════════════════════
+       SECTION C — BOSSES
+    ══════════════════════════════════════ */
+    .boss-list { display: flex; flex-direction: column; gap: 12px; }
+    .boss-card {
+      background: var(--bg-panel2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 16px;
+      position: relative; overflow: hidden;
+      transition: border-color .3s;
+    }
+    .boss-card.active  { border-color: var(--red); }
+    .boss-card.defeated { border-color: var(--gold-dim); opacity: 0.6; }
+    .boss-card.locked  { opacity: 0.38; }
+    .boss-card.active::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(176,48,32,0.07), transparent);
+    }
+
+    /* Boss card with image */
+    .boss-card.has-image {
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+    .boss-card-img {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      object-position: center top;
+      display: block;
+      background: #030302;
+      filter: brightness(0.9);
+      transition: filter .4s;
+    }
+    .boss-card.has-image:hover .boss-card-img { filter: brightness(1.05); }
+    .boss-card-img-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(6,5,4,1) 0%, rgba(6,5,4,0.7) 50%, transparent 100%);
+      padding: 28px 24px 20px;
+      display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+    }
+    .boss-lvl-badge {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 18px; font-weight: 900;
+      color: var(--gold-dim);
+      min-width: 36px; text-align: center;
+      flex-shrink: 0;
+    }
+    .boss-card.active  .boss-lvl-badge { color: var(--red-glow); text-shadow: 0 0 10px rgba(255,85,68,.4); }
+    .boss-card.defeated .boss-lvl-badge { color: var(--gold); }
+    .boss-info { flex: 1; }
+    .boss-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13px; letter-spacing: 2px;
+      color: var(--text); margin-bottom: 3px;
+    }
+    .boss-card.defeated .boss-name { text-decoration: line-through; color: var(--text-dim); }
+    .boss-subtitle {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 11px; color: var(--text-dim);
+    }
+    .boss-status-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 3px;
+      padding: 4px 10px; border-radius: 2px;
+      text-transform: uppercase; flex-shrink: 0;
+    }
+    .boss-status-badge.active   { color: var(--red-glow); border: 1px solid var(--red); background: rgba(176,48,32,.12); animation: bossFlicker 1.4s ease-in-out infinite; }
+    .boss-status-badge.defeated { color: var(--green-glow); border: 1px solid var(--green); background: rgba(30,140,80,.1); }
+    .boss-status-badge.locked   { color: var(--text-dim); border: 1px solid var(--border); }
+    @keyframes bossFlicker { 0%,100%{opacity:1} 50%{opacity:.55} }
+
+    /* Boss HP bar */
+    .boss-hp-wrap {
+      margin-top: 10px;
+      width: 100%;
+    }
+    .boss-hp-label {
+      display: flex; justify-content: space-between;
+      font-size: 8px; letter-spacing: 2px;
+      color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .boss-hp-label .hp-val { color: var(--red-glow); font-family: 'Cinzel', serif; }
+    .boss-hp-track {
+      height: 8px;
+      background: rgba(6,5,4,0.9);
+      border: 1px solid rgba(176,48,32,0.35);
+      position: relative; overflow: hidden;
+    }
+    .boss-hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6a0000, #b03020, #ff4433);
+      transition: width 1.2s cubic-bezier(.25,.46,.45,.94);
+      position: relative;
+    }
+    .boss-card.active .boss-hp-fill::after {
+      content: '';
+      position: absolute; top: 0; right: 0; bottom: 0; width: 30px;
+      background: linear-gradient(90deg, transparent, rgba(255,100,80,0.5));
+      animation: hpGlint 1.8s ease-in-out infinite;
+    }
+    @keyframes hpGlint { 0%,100%{opacity:0} 50%{opacity:1} }
+    .boss-card.defeated .boss-hp-fill { background: var(--border); opacity: 0.4; }
+    .boss-card.locked .boss-hp-track { opacity: 0.4; }
+
+    /* ══════════════════════════════════════
+       SECTION D — GEAR
+    ══════════════════════════════════════ */
+    .gear-cards {
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+
+    .gear-card {
+      flex: 1; min-width: 200px;
+      background: var(--bg-panel2);
+      border: 1px solid var(--border);
+      padding: 28px 20px 20px;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      position: relative; transition: border-color 0.3s;
+    }
+    .gear-card.gear-unlocked {
+      border-color: var(--gold-dim);
+    }
+    .gear-card.gear-unlocked::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,76,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .gear-card.gear-locked {
+      border-color: var(--border);
+      filter: brightness(0.4);
+    }
+
+    /* Gear card with image */
+    .gear-card.has-image {
+      padding: 0;
+      align-items: stretch;
+    }
+    .gear-card-img-wrap {
+      position: relative;
+      overflow: hidden;
+      background: #030302;
+    }
+    .gear-card-img {
+      width: 100%;
+      display: block;
+      object-fit: contain;
+      max-height: 320px;
+      transition: filter .4s, transform .4s;
+    }
+    .gear-card.gear-unlocked.has-image::before { display: none; }
+    .gear-card.has-image:hover .gear-card-img { filter: brightness(1.1); transform: scale(1.02); }
+    .gear-card.gear-locked .gear-card-img { filter: brightness(0.25) saturate(0); }
+    .gear-card-img-body {
+      padding: 16px 20px 20px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      flex: 1;
+    }
+
+    /* Rarity border glow */
+    .gear-card.has-image.rarity-common    { border-color: #4caf6e; box-shadow: 0 0 14px rgba(76,175,110,0.25), inset 0 0 20px rgba(76,175,110,0.04); }
+    .gear-card.has-image.rarity-uncommon  { border-color: #5b8dd9; box-shadow: 0 0 14px rgba(91,141,217,0.25), inset 0 0 20px rgba(91,141,217,0.04); }
+    .gear-card.has-image.rarity-rare      { border-color: #9b6ddb; box-shadow: 0 0 14px rgba(155,109,219,0.25), inset 0 0 20px rgba(155,109,219,0.04); }
+    .gear-card.has-image.rarity-epic      { border-color: #d4823a; box-shadow: 0 0 14px rgba(212,130,58,0.25), inset 0 0 20px rgba(212,130,58,0.04); }
+    .gear-card.has-image.rarity-legendary { border-color: #c9a84c; box-shadow: 0 0 18px rgba(201,168,76,0.35), inset 0 0 20px rgba(201,168,76,0.06); }
+
+    /* Locked gear: suppress rarity glow */
+    .gear-card.gear-locked.has-image { border-color: var(--border) !important; box-shadow: none !important; }
+
+    /* Level + rarity badge row over the image */
+    .gear-card-badges {
+      position: absolute; top: 8px; left: 8px;
+      display: flex; gap: 5px; align-items: center;
+      z-index: 1;
+    }
+    .gear-lvl-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 2px;
+      padding: 3px 8px;
+      background: rgba(6,5,4,0.82);
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+    .gear-rarity-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 8px; letter-spacing: 2px;
+      padding: 3px 8px;
+      background: rgba(6,5,4,0.82);
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+
+    .gear-icon {
+      font-size: 40px;
+      margin-bottom: 14px;
+      display: block;
+      line-height: 1;
+    }
+    .gear-card.gear-unlocked .gear-icon {
+      filter: drop-shadow(0 0 8px rgba(201,168,76,0.7));
+    }
+
+    .gear-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13px; letter-spacing: 0.08em;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+    .gear-card.gear-unlocked .gear-name { color: var(--gold-light); }
+    .gear-card.gear-locked .gear-name   { color: var(--text-dim); }
+
+    .gear-type {
+      font-size: 9px; letter-spacing: 3px;
+      color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .gear-badge {
+      font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase; padding: 4px 14px;
+      margin-top: auto;
+    }
+    .gear-badge.badge-unlocked {
+      color: var(--gold); border: 1px solid var(--gold-dim);
+      background: rgba(201,168,76,0.08);
+    }
+    .gear-badge.badge-locked {
+      color: var(--text-dim); border: 1px solid var(--border);
+      background: transparent;
+    }
+    /* XP progress bar for locked gear */
+    .gear-xp-bar-wrap {
+      width: 100%; margin-top: 10px;
+      background: rgba(6,5,4,0.8); border: 1px solid var(--border); height: 6px;
+      position: relative; overflow: hidden;
+    }
+    .gear-xp-bar-fill {
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: linear-gradient(90deg, var(--gold-dim), var(--amber));
+      transition: width 0.8s ease;
+    }
+    .gear-xp-label {
+      font-size: 8px; letter-spacing: 2px;
+      color: var(--text-dim); margin-top: 6px;
+    }
+
+    /* ══════════════════════════════════════
+       SECTION E — QUESTS
+    ══════════════════════════════════════ */
+    .quests-list {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+    }
+    .quest-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(46,39,32,0.6);
+    }
+    .quest-row:last-child { border-bottom: none; }
+    .quest-name {
+      font-family: 'Cinzel', serif;
+      font-size: 12px; letter-spacing: 0.06em;
+      color: var(--text); flex: 1; line-height: 1.4;
+    }
+    .quest-badge {
+      font-size: 9px; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 3px 9px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .quest-badge.badge-completed {
+      background: rgba(30,140,80,0.12);
+      color: var(--green-glow);
+      border: 1px solid var(--green);
+    }
+    .quest-badge.badge-active {
+      background: rgba(212,130,58,0.12);
+      color: var(--amber);
+      border: 1px solid rgba(212,130,58,0.4);
+    }
+    .quest-badge.badge-inactive {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+    .quest-xp {
+      font-family: 'Cinzel', serif;
+      font-size: 11px; color: var(--gold);
+      white-space: nowrap; flex-shrink: 0;
+      letter-spacing: 0.05em;
+    }
+
+    .quests-empty {
+      padding: 28px 20px;
+      text-align: center;
+      font-size: 12px; color: var(--text-dim);
+      font-style: italic;
+      font-family: 'IM Fell English', serif;
+    }
+
+    /* ══════════════════════════════════════
+       FOG CANVAS — Full-page smoke overlay
+    ══════════════════════════════════════ */
+    #fog-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 4;
+      pointer-events: none;
+      opacity: 1;
+    }
+
+    /* ══════════════════════════════════════
+       SECTION F — ASH PARTICLE CANVAS
+    ══════════════════════════════════════ */
+    #ash-canvas {
+      display: block;
+      width: 100%; height: 200px;
+      background: var(--bg-dark);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    #footer {
+      text-align: center;
+      padding: 40px 0;
+      font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 4px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      background: var(--bg-deep);
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width: 600px) {
+      .status-cards, .gear-cards {
+        flex-direction: column;
+      }
+      .status-card, .gear-card {
+        min-width: unset;
+      }
+      .hero-lore {
+        font-size: 14px;
+      }
+      .lore-panel {
+        padding: 20px 20px;
+      }
+      .container {
+        padding: 40px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Fog overlay ── -->
+<canvas id="fog-canvas"></canvas>
+
+<!-- ── Top Nav Bar ── -->
+<div id="topbar">
+  <div class="topbar-left">
+    <a href="/map">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <path d="M10 3L5 8L10 13" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      World Map
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M2 6.5L8 2L14 6.5V14H10V10H6V14H2V6.5Z" stroke="#c9a84c" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      Dashboard
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/story">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M3 2h8l2 2v11H3V2z" stroke="#c9a84c" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M6 6h5M6 9h5M6 12h3" stroke="#c9a84c" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+      Chronicle
+    </a>
+    <div class="topbar-divider"></div>
+    <a href="/library">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <path d="M2 3h3v10H2zM6 3h3v10H6zM10 3h4v10h-4z" stroke="#c9a84c" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      Library
+    </a>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div id="level-badge">LVL —</div>
+  <button class="btn-logout" onclick="logout()">↩ LOGOUT</button>
+</div>
+
+<!-- ── Hero Section — Region title ── -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-dlc">DLC I</div>
+    <h1 class="hero-title">The Ashen City</h1>
+    <div class="hero-levels">Levels 1 – 5</div>
+    <div class="ornament-rule">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+    <p class="hero-lore">
+      Once the industrial heart of the old world, the Ashen City now lies fractured beneath a permanent grey shroud.
+      Its towering smokestacks have gone cold, its streets littered with the remnants of a civilisation that burned itself to nothing.
+      But in the ruins, something still smoulders — a single ember that refuses to go out.
+    </p>
+  </div>
+  <div class="scroll-hint">
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- ── Boss Spotlight — Current boss ── -->
+<div id="boss-spotlight">
+  <div class="boss-spotlight-visual">
+    <div class="boss-spotlight-bg"></div>
+    <img class="boss-spotlight-img" id="hero-boss-img" src="/boss-ashen-1.png" alt="Current Boss"/>
+  </div>
+  <div class="boss-spotlight-info">
+    <div class="boss-spotlight-label">⚠ Current Boss</div>
+    <div class="boss-spotlight-name" id="hero-boss-name">The Scavenger King</div>
+    <div class="boss-spotlight-sub" id="hero-boss-sub">Warlord of the Ruined Wastes</div>
+    <div class="boss-spotlight-divider"></div>
+    <div class="boss-spotlight-level">Level Required &nbsp;<span id="spotlight-lvl-req">1</span></div>
+    <div style="margin-top:20px;">
+      <div class="boss-status-badge active" style="display:inline-block;">Active</div>
+    </div>
+    <div class="boss-hp-wrap" id="spotlight-hp-wrap" style="margin-top:24px;">
+      <div class="boss-hp-label">
+        <span>HP</span>
+        <span class="hp-val" id="spotlight-hp-val">—</span>
+      </div>
+      <div class="boss-hp-track">
+        <div class="boss-hp-fill" id="spotlight-hp-fill" style="width:100%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Content Sections ── -->
+<div id="content">
+  <div class="container">
+
+    <!-- SECTION A — CURRENT STATUS -->
+    <div class="section-label">Current Status</div>
+    <div class="status-cards">
+
+      <div class="status-card">
+        <div class="status-card-level-num" id="stat-level">—</div>
+        <div class="status-card-label">Current Level</div>
+      </div>
+
+      <div class="status-card">
+        <div class="xp-card-inner">
+          <div class="xp-card-total" id="stat-xp">—</div>
+          <div class="xp-card-sublabel">Total XP Earned</div>
+          <div class="xp-bar-wrap">
+            <div class="xp-bar-fill" id="xp-bar-fill" style="width: 0%"></div>
+          </div>
+          <div class="xp-bar-labels">
+            <span>0 XP</span>
+            <span id="xp-bar-pct">0%</span>
+            <span>31,300 XP</span>
+          </div>
+          <div class="xp-bar-threshold">Threshold: Level 5 Completion</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- SECTION B — REGION LORE -->
+    <div class="section-label">Region Lore</div>
+    <div class="lore-panel">
+      <p class="lore-text">
+        Once the industrial heart of the old world, the Ashen City now lies fractured beneath a permanent grey shroud.
+        Its towering smokestacks have gone cold, its streets littered with the remnants of a civilisation that burned itself to nothing.
+        But in the ruins, something still smoulders — a single ember that refuses to go out, a hunter who walks where others have fallen.
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- SECTION C — BOSSES -->
+    <div class="section-label">Region Bosses</div>
+    <div class="boss-list" id="boss-list">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- SECTION D — GEAR -->
+    <div class="section-label">Region Gear</div>
+    <div class="gear-cards" id="gear-cards">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- SECTION E — QUESTS -->
+    <div class="section-label">Active Quests</div>
+    <div class="quests-list" id="quests-list">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider">
+      <div class="line"></div>
+      <div class="diamond"></div>
+      <div class="line"></div>
+    </div>
+
+    <!-- SECTION F — ASH PARTICLE CANVAS -->
+    <div class="section-label">The Ash</div>
+
+  </div><!-- /.container -->
+
+  <!-- Full-width canvas below container label -->
+  <canvas id="ash-canvas"></canvas>
+
+  <div id="footer">The Ashen City — DLC I</div>
+</div>
+
+<script>
+'use strict';
+
+function logout() {
+  fetch('/api/logout', { method: 'POST' }).then(() => { window.location.href = '/login'; });
+}
+
+/* ══════════════════════════════════════
+   LEVELS TABLE
+══════════════════════════════════════ */
+const LEVELS = [
+  { level: 1, xp: 0     },
+  { level: 2, xp: 7300  },
+  { level: 3, xp: 13300 },
+  { level: 4, xp: 19300 },
+  { level: 5, xp: 25300 },
+  { level: 6, xp: 31300 },
+];
+
+const MAX_XP = 31300; // Level 5 completion threshold
+
+/* ══════════════════════════════════════
+   ASH PARTICLE CANVAS
+══════════════════════════════════════ */
+const ashCanvas = document.getElementById('ash-canvas');
+const ashCtx    = ashCanvas.getContext('2d');
+
+let ashParticles = [];
+
+function resizeAshCanvas() {
+  ashCanvas.width  = ashCanvas.offsetWidth;
+  ashCanvas.height = 200;
+  initAshParticles();
+}
+
+function rand(min, max) { return min + Math.random() * (max - min); }
+
+function initAshParticles() {
+  const W = ashCanvas.width;
+  const H = ashCanvas.height;
+  ashParticles = [];
+  for (let i = 0; i < 35; i++) {
+    ashParticles.push({
+      x: rand(0, W),
+      y: rand(0, H),
+      r: rand(0.8, 2.5),
+      vy: rand(0.2, 0.8),
+      wobble: rand(0, Math.PI * 2),
+      wobbleSpeed: rand(0.008, 0.025),
+      alpha: rand(0.2, 0.65),
+    });
+  }
+}
+
+function animateAsh() {
+  const W = ashCanvas.width;
+  const H = ashCanvas.height;
+
+  ashCtx.clearRect(0, 0, W, H);
+
+  for (const p of ashParticles) {
+    p.wobble += p.wobbleSpeed;
+    p.x += Math.sin(p.wobble) * 0.4;
+    p.y += p.vy;
+
+    if (p.y > H + 4) {
+      p.y = -4;
+      p.x = rand(0, W);
+    }
+
+    const grey = Math.floor(rand(170, 220));
+    ashCtx.beginPath();
+    ashCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ashCtx.fillStyle = `rgba(${grey},${grey - 5},${grey - 12},${p.alpha})`;
+    ashCtx.fill();
+  }
+
+  requestAnimationFrame(animateAsh);
+}
+
+window.addEventListener('resize', () => {
+  ashCanvas.width  = ashCanvas.offsetWidth;
+  ashCanvas.height = 200;
+  initAshParticles();
+});
+
+resizeAshCanvas();
+animateAsh();
+
+/* ══════════════════════════════════════
+   FOG / SMOKE EFFECT
+══════════════════════════════════════ */
+const fogCanvas = document.getElementById('fog-canvas');
+const fogCtx    = fogCanvas.getContext('2d');
+
+let fogPatches = [];
+
+function initFog() {
+  fogCanvas.width  = window.innerWidth;
+  fogCanvas.height = window.innerHeight;
+
+  const W = fogCanvas.width;
+  const H = fogCanvas.height;
+
+  fogPatches = [];
+
+  // Layer 1 — slow, large bg wisps
+  for (let i = 0; i < 5; i++) {
+    fogPatches.push({
+      x:     Math.random() * W * 1.6 - W * 0.3,
+      y:     Math.random() * H,
+      r:     320 + Math.random() * 220,
+      vx:    0.08 + Math.random() * 0.10,
+      alpha: 0.09 + Math.random() * 0.05,
+      phase: Math.random() * Math.PI * 2,
+      phaseSpd: 0.0006 + Math.random() * 0.0006,
+      layer: 0,
+      color: Math.random() > 0.4 ? '195,188,175' : '160,150,135',
+    });
+  }
+
+  // Layer 2 — mid-speed medium patches
+  for (let i = 0; i < 6; i++) {
+    fogPatches.push({
+      x:     Math.random() * W * 1.6 - W * 0.3,
+      y:     Math.random() * H,
+      r:     180 + Math.random() * 160,
+      vx:    0.18 + Math.random() * 0.16,
+      alpha: 0.07 + Math.random() * 0.04,
+      phase: Math.random() * Math.PI * 2,
+      phaseSpd: 0.001 + Math.random() * 0.001,
+      layer: 1,
+      color: Math.random() > 0.5 ? '210,200,188' : '175,165,150',
+    });
+  }
+
+  // Layer 3 — fast, small wisps
+  for (let i = 0; i < 5; i++) {
+    fogPatches.push({
+      x:     Math.random() * W * 1.6 - W * 0.3,
+      y:     Math.random() * H,
+      r:     90 + Math.random() * 100,
+      vx:    0.32 + Math.random() * 0.22,
+      alpha: 0.05 + Math.random() * 0.03,
+      phase: Math.random() * Math.PI * 2,
+      phaseSpd: 0.0018 + Math.random() * 0.001,
+      layer: 2,
+      color: '220,215,205',
+    });
+  }
+}
+
+function animateFog() {
+  const W = fogCanvas.width;
+  const H = fogCanvas.height;
+
+  fogCtx.clearRect(0, 0, W, H);
+
+  for (const p of fogPatches) {
+    p.phase += p.phaseSpd;
+    p.x     += p.vx;
+    p.y     += Math.sin(p.phase) * (p.layer === 0 ? 0.18 : p.layer === 1 ? 0.35 : 0.55);
+
+    // Wrap: when fully past right edge, re-enter from left
+    if (p.x - p.r > W) {
+      p.x = -p.r;
+      p.y = Math.random() * H;
+    }
+
+    // Soft radial gradient blob
+    const grad = fogCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+    grad.addColorStop(0,    `rgba(${p.color},${p.alpha})`);
+    grad.addColorStop(0.45, `rgba(${p.color},${(p.alpha * 0.55).toFixed(3)})`);
+    grad.addColorStop(1,    `rgba(${p.color},0)`);
+
+    fogCtx.beginPath();
+    fogCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    fogCtx.fillStyle = grad;
+    fogCtx.fill();
+  }
+
+  requestAnimationFrame(animateFog);
+}
+
+window.addEventListener('resize', () => { initFog(); });
+
+// Delay slightly so the canvas has correct layout dimensions
+requestAnimationFrame(() => { initFog(); animateFog(); });
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString();
+}
+
+/* ══════════════════════════════════════
+   RENDER GEAR
+══════════════════════════════════════ */
+// Map boss images: key = "region-level_req"
+const BOSS_IMAGES = {
+  'ashen-1': '/boss-ashen-1.png',
+  'ashen-2': '/boss-ashen-2.png',
+};
+
+// Map gear images: key = "type-region"
+const GEAR_IMAGES = {
+  'weapon-ashen': '/gear-weapon-ashen.png',
+  'armour-ashen': '/gear-armour-ashen.png',
+};
+
+// XP thresholds for gear that unlocks mid-level (instead of at a full level)
+// key = "type-region", value = XP required
+const GEAR_XP_THRESHOLDS = {
+  'weapon-ashen': 3650, // halfway through level 1 (0 → 7300)
+  // armour-ashen uses DB unlock_lvl (2) — no XP override needed
+};
+
+// Gear rarity: drives border colour + badge
+// common | uncommon | rare | epic | legendary
+const GEAR_RARITY = {
+  'weapon-ashen': 'common',
+  'armour-ashen': 'common',
+};
+
+const RARITY_COLORS = {
+  common:    { border: '#4caf6e', glow: 'rgba(76,175,110,0.35)',  label: 'Common'    },
+  uncommon:  { border: '#5b8dd9', glow: 'rgba(91,141,217,0.35)', label: 'Uncommon'  },
+  rare:      { border: '#9b6ddb', glow: 'rgba(155,109,219,0.35)',label: 'Rare'      },
+  epic:      { border: '#d4823a', glow: 'rgba(212,130,58,0.35)', label: 'Epic'      },
+  legendary: { border: '#c9a84c', glow: 'rgba(201,168,76,0.45)', label: 'Legendary' },
+};
+
+function calcBossHp(levelReq, totalXp) {
+  // HP = inverse of XP progress through that boss's level
+  const startEntry = LEVELS.find(l => l.level === levelReq);
+  const endEntry   = LEVELS.find(l => l.level === levelReq + 1);
+  if (!startEntry) return 100;
+  const startXp = startEntry.xp;
+  const endXp   = endEntry ? endEntry.xp : startXp + 6000;
+  if (totalXp <= startXp) return 100;
+  if (totalXp >= endXp)   return 0;
+  return Math.round((1 - (totalXp - startXp) / (endXp - startXp)) * 100);
+}
+
+function bossHpHtml(b, totalXp) {
+  const hp = b.status === 'defeated' ? 0 : b.status === 'locked' ? 100 : calcBossHp(b.level_req, totalXp);
+  const hpLabel = b.status === 'defeated' ? 'DEFEATED' : `${hp}% HP`;
+  return `
+    <div class="boss-hp-wrap">
+      <div class="boss-hp-label">
+        <span>HP</span>
+        <span class="hp-val">${hpLabel}</span>
+      </div>
+      <div class="boss-hp-track">
+        <div class="boss-hp-fill" style="width:${hp}%"></div>
+      </div>
+    </div>`;
+}
+
+function renderBosses(bosses, totalXp) {
+  const el = document.getElementById('boss-list');
+  if (!bosses.length) { el.innerHTML = '<p style="color:var(--text-dim);font-size:12px;">No boss data found.</p>'; return; }
+  el.innerHTML = bosses.map(b => {
+    const statusLabel = b.status === 'defeated' ? 'Defeated' : b.status === 'active' ? 'Active' : 'Locked';
+    // Only show image when boss is active or defeated — locked bosses stay hidden
+    const imgSrc = b.status !== 'locked' ? BOSS_IMAGES[`${b.region}-${b.level_req}`] : null;
+    const hpBar  = bossHpHtml(b, totalXp);
+
+    if (imgSrc) {
+      return `
+        <div class="boss-card ${b.status} has-image" style="position:relative;">
+          <img class="boss-card-img" src="${imgSrc}" alt="${b.name}"/>
+          <div class="boss-card-img-overlay">
+            <div style="flex:1;">
+              <div class="boss-lvl-badge" style="font-size:13px;margin-bottom:4px;">LVL ${b.level_req}</div>
+              <div class="boss-name" style="font-size:16px;letter-spacing:3px;">${b.name}</div>
+              <div class="boss-subtitle">${b.subtitle}</div>
+            </div>
+            <div class="boss-status-badge ${b.status}" style="flex-shrink:0;align-self:flex-end;">${statusLabel}</div>
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="boss-card ${b.status}">
+        <div class="boss-lvl-badge">${b.level_req}</div>
+        <div class="boss-info">
+          <div class="boss-name">${b.name}</div>
+          <div class="boss-subtitle">${b.subtitle}</div>
+        </div>
+        <div class="boss-status-badge ${b.status}">${statusLabel}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderGear(gear, playerLevel, totalXp) {
+  const container = document.getElementById('gear-cards');
+
+  // Filter ashen gear; fall back to hardcoded defaults if API returns nothing
+  let ashenGear = gear.filter(g => g.region === 'ashen');
+
+  if (ashenGear.length === 0) {
+    ashenGear = [
+      { id: 'weapon-ashen', region: 'ashen', type: 'weapon', name: 'Rusted Iron Blade', unlock_lvl: 1 },
+      { id: 'armour-ashen', region: 'ashen', type: 'armour', name: "Scavenger's Coat",  unlock_lvl: 1 },
+    ];
+  }
+
+  let html = '';
+  for (const g of ashenGear) {
+    const key = `${g.type}-${g.region}`;
+    const imgSrc   = GEAR_IMAGES[key];
+    const xpThresh = GEAR_XP_THRESHOLDS[key];
+
+    // Unlock check: XP threshold if defined, otherwise full level
+    const unlocked = xpThresh != null
+      ? totalXp >= xpThresh
+      : playerLevel >= g.unlock_lvl;
+
+    const icon      = g.type === 'weapon' ? '⚔' : '🛡';
+    const cardClass = unlocked ? 'gear-unlocked' : 'gear-locked';
+    const badgeClass = unlocked ? 'badge-unlocked' : 'badge-locked';
+    const badgeLabel = unlocked ? 'EQUIPPED' : 'LOCKED';
+
+    if (imgSrc) {
+      const rarity     = GEAR_RARITY[key] || 'common';
+      const rarityInfo = RARITY_COLORS[rarity];
+
+      // XP progress bar for locked items with XP threshold
+      let progressHtml = '';
+      if (!unlocked && xpThresh != null) {
+        const pct = Math.min(100, Math.round((totalXp / xpThresh) * 100));
+        progressHtml = `
+          <div class="gear-xp-bar-wrap">
+            <div class="gear-xp-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="gear-xp-label">${totalXp.toLocaleString()} / ${xpThresh.toLocaleString()} XP to unlock</div>`;
+      }
+
+      html += `
+        <div class="gear-card has-image ${cardClass} rarity-${rarity}">
+          <div class="gear-card-img-wrap">
+            <img class="gear-card-img" src="${imgSrc}" alt="${escHtml(g.name)}"/>
+            <div class="gear-card-badges">
+              <span class="gear-lvl-badge">LVL ${g.unlock_lvl}</span>
+              <span class="gear-rarity-badge" style="border:1px solid ${rarityInfo.border};color:${rarityInfo.border};">${rarityInfo.label}</span>
+            </div>
+          </div>
+          <div class="gear-card-img-body">
+            <div class="gear-name">${escHtml(g.name)}</div>
+            <div class="gear-type">${escHtml(g.type)}</div>
+            <span class="gear-badge ${badgeClass}">${badgeLabel}</span>
+            ${progressHtml}
+          </div>
+        </div>`;
+    } else {
+      html += `
+        <div class="gear-card ${cardClass}">
+          <span class="gear-icon">${icon}</span>
+          <div class="gear-name">${escHtml(g.name)}</div>
+          <div class="gear-type">${escHtml(g.type)}</div>
+          <span class="gear-badge ${badgeClass}">${badgeLabel}</span>
+        </div>`;
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+/* ══════════════════════════════════════
+   RENDER QUESTS
+══════════════════════════════════════ */
+function renderQuests(quests) {
+  const container = document.getElementById('quests-list');
+
+  // Ashen City quests have tag === 'weekly'
+  const ashenQuests = quests.filter(q => q.tag === 'weekly');
+
+  if (ashenQuests.length === 0) {
+    container.innerHTML = `<div class="quests-empty">No active quests in this region.</div>`;
+    return;
+  }
+
+  let html = '';
+  for (const q of ashenQuests) {
+    let badgeClass, badgeLabel;
+    if (q.status === 'completed') {
+      badgeClass = 'badge-completed'; badgeLabel = 'COMPLETED';
+    } else if (q.status === 'active') {
+      badgeClass = 'badge-active'; badgeLabel = 'ACTIVE';
+    } else {
+      badgeClass = 'badge-inactive'; badgeLabel = 'INACTIVE';
+    }
+
+    html += `
+      <div class="quest-row">
+        <div class="quest-name">${escHtml(q.name)}</div>
+        <span class="quest-badge ${badgeClass}">${badgeLabel}</span>
+        <div class="quest-xp">+${fmt(q.xp)} XP</div>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+/* ══════════════════════════════════════
+   DATA LOAD
+══════════════════════════════════════ */
+async function init() {
+  try {
+    const res  = await fetch('/api/map');
+    const data = await res.json();
+
+    const playerLevel = data.level || 1;
+
+    // -- Level badge
+    document.getElementById('level-badge').textContent = `LVL ${playerLevel}`;
+
+    // -- Status card: level number
+    document.getElementById('stat-level').textContent = playerLevel;
+
+    // -- XP: use actual total_xp from API
+    const totalXp = data.total_xp || 0;
+
+    document.getElementById('stat-xp').textContent = fmt(totalXp) + ' XP';
+
+    // -- XP bar (progress toward 31,300)
+    const pct = Math.min(100, (totalXp / MAX_XP) * 100);
+    document.getElementById('xp-bar-fill').style.width = pct.toFixed(1) + '%';
+    document.getElementById('xp-bar-pct').textContent  = pct.toFixed(0) + '%';
+
+    // -- Bosses
+    const ashenBosses = (data.regionBosses || []).filter(b => b.region === 'ashen');
+    renderBosses(ashenBosses, totalXp);
+
+    // -- Boss spotlight: update from active boss
+    const activeBoss = ashenBosses.find(b => b.status === 'active');
+    if (activeBoss) {
+      const imgSrc = BOSS_IMAGES[`${activeBoss.region}-${activeBoss.level_req}`];
+      document.getElementById('hero-boss-name').textContent = activeBoss.name;
+      document.getElementById('hero-boss-sub').textContent  = activeBoss.subtitle;
+      if (imgSrc) document.getElementById('hero-boss-img').src = imgSrc;
+      document.getElementById('spotlight-lvl-req').textContent = activeBoss.level_req;
+      // HP bar
+      const hp = calcBossHp(activeBoss.level_req, totalXp);
+      document.getElementById('spotlight-hp-val').textContent  = `${hp}% HP`;
+      document.getElementById('spotlight-hp-fill').style.width = `${hp}%`;
+    }
+
+    // -- Gear
+    renderGear(data.gear || [], playerLevel, totalXp);
+
+    // -- Quests
+    renderQuests(data.quests || []);
+
+  } catch (err) {
+    console.warn('Could not load map data:', err);
+
+    // Graceful fallback UI
+    document.getElementById('level-badge').textContent = 'LVL 1';
+    document.getElementById('stat-level').textContent  = '1';
+    document.getElementById('stat-xp').textContent     = '0 XP';
+    document.getElementById('xp-bar-fill').style.width = '0%';
+    document.getElementById('xp-bar-pct').textContent  = '0%';
+
+    renderGear([], 1, 0);
+    renderQuests([]);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferro Animus — Forge Your Legend</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c878;
+  --gold-dim: #5a3e14;
+  --bg-deep: #060504;
+  --bg-dark: #0c0a08;
+  --bg-panel: #111009;
+  --border: #2e2720;
+  --text: #ddd8cc;
+  --text-mid: #9a8e78;
+  --text-dim: #5a5040;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 100% 50% at 50% -10%, rgba(90,65,25,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at -10% 60%, rgba(110,75,25,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 110% 20%, rgba(70,55,25,0.07) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.panel {
+  position: relative; z-index: 1;
+  background: var(--bg-panel);
+  border: 1px solid var(--gold-dim);
+  padding: 48px 48px 44px;
+  max-width: 400px;
+  width: 90%;
+}
+
+.panel::before  { content: ''; position: absolute; top: 7px;    left: 7px;   width: 10px; height: 10px; border: 1px solid var(--gold); border-right: none; border-bottom: none; }
+.panel::after   { content: ''; position: absolute; top: 7px;    right: 7px;  width: 10px; height: 10px; border: 1px solid var(--gold); border-left: none;  border-bottom: none; }
+.corner-bl      { position: absolute; bottom: 7px; left: 7px;   width: 10px; height: 10px; border: 1px solid var(--gold); border-right: none; border-top: none; }
+.corner-br      { position: absolute; bottom: 7px; right: 7px;  width: 10px; height: 10px; border: 1px solid var(--gold); border-left: none;  border-top: none; }
+
+.panel-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 22px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+  text-shadow: 0 0 30px rgba(201,168,76,0.3);
+}
+
+.panel-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 2px;
+  margin-bottom: 36px;
+}
+
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-mid);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.form-group input {
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--gold-dim);
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus { border-color: var(--gold); }
+.form-group input::placeholder { color: var(--text-dim); }
+
+.form-hint {
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+
+.btn-primary {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.btn-primary:hover {
+  background: rgba(201,168,76,0.1);
+  box-shadow: 0 0 20px rgba(201,168,76,0.15);
+}
+
+.divider {
+  text-align: center;
+  margin: 28px 0 20px;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  position: relative;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: var(--border);
+}
+.divider::before { left: 0; }
+.divider::after  { right: 0; }
+
+.link-text {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+.link-text a {
+  color: var(--gold);
+  text-decoration: none;
+  letter-spacing: 2px;
+}
+.link-text a:hover { text-decoration: underline; }
+
+.error-msg {
+  color: #ff5544;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-top: 14px;
+  min-height: 16px;
+}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="corner-bl"></div>
+  <div class="corner-br"></div>
+  <div class="panel-title">FERRO ANIMUS</div>
+  <div class="panel-sub">Forge Your Legend</div>
+  <form id="register-form">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" name="username" placeholder="Choose a name…" autocomplete="username" required>
+      <div class="form-hint">3–20 alphanumeric characters</div>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" name="password" placeholder="Create a password…" autocomplete="new-password" required>
+      <div class="form-hint">At least 8 characters</div>
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input type="password" id="confirm" name="confirm" placeholder="Repeat your password…" autocomplete="new-password" required>
+    </div>
+    <button type="submit" class="btn-primary">✦ BEGIN YOUR JOURNEY</button>
+  </form>
+  <div class="error-msg" id="error-msg"></div>
+  <div class="divider">— OR —</div>
+  <div class="link-text">Already a warrior? <a href="/login">ENTER THE REALM</a></div>
+</div>
+
+<script>
+document.getElementById('register-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const confirm  = document.getElementById('confirm').value;
+  const errEl    = document.getElementById('error-msg');
+  errEl.textContent = '';
+
+  if (password !== confirm) {
+    errEl.textContent = 'Passwords do not match';
+    return;
+  }
+
+  try {
+    const res  = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Registration failed'; return; }
+    window.location.href = data.redirect || '/';
+  } catch (err) {
+    errEl.textContent = 'Connection error. Try again.';
+  }
+});
+</script>
+</body>
+</html>
