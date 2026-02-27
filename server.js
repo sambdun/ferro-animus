@@ -6,17 +6,56 @@ const session = require('express-session');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'solo_leveling.db');
 const app = express();
+app.set('trust proxy', 1);
+
+const db = new DatabaseSync(DB_PATH);
+db.exec('PRAGMA journal_mode = WAL');
+
+class SQLiteStore extends session.Store {
+  constructor(database) {
+    super();
+    this.db = database;
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        sid     TEXT PRIMARY KEY,
+        sess    TEXT NOT NULL,
+        expired INTEGER NOT NULL
+      )
+    `);
+    setInterval(() => {
+      this.db.prepare('DELETE FROM sessions WHERE expired < ?').run(Math.floor(Date.now() / 1000));
+    }, 15 * 60 * 1000).unref();
+  }
+  get(sid, cb) {
+    try {
+      const row = this.db.prepare('SELECT sess, expired FROM sessions WHERE sid = ?').get(sid);
+      if (!row || row.expired < Math.floor(Date.now() / 1000)) return cb(null, null);
+      cb(null, JSON.parse(row.sess));
+    } catch (e) { cb(e); }
+  }
+  set(sid, sess, cb) {
+    try {
+      const ttl = sess.cookie && sess.cookie.maxAge ? Math.floor(sess.cookie.maxAge / 1000) : 86400;
+      this.db.prepare('INSERT OR REPLACE INTO sessions (sid, sess, expired) VALUES (?, ?, ?)').run(sid, JSON.stringify(sess), Math.floor(Date.now() / 1000) + ttl);
+      cb(null);
+    } catch (e) { cb(e); }
+  }
+  destroy(sid, cb) {
+    try {
+      this.db.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
+      cb(null);
+    } catch (e) { cb(e); }
+  }
+}
 
 app.use(express.json());
 app.use(session({
+  store: new SQLiteStore(db),
   secret: process.env.SESSION_SECRET || 'ferro-animus-dev-secret',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 7 days
 }));
-
-const db = new DatabaseSync(DB_PATH);
-db.exec('PRAGMA journal_mode = WAL');
 
 // ── Auth middleware ────────────────────────────────────────────────────────────
 function requireLogin(req, res, next) {
