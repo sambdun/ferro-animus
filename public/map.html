@@ -388,6 +388,19 @@ const PATH_WAYPOINTS = [
   [0.77, 0.46], [0.81, 0.40], [0.86, 0.44], [0.90, 0.40], [0.95, 0.45],
 ];
 
+const LEVEL_XP = [0,7300,13300,19300,25300,31300,37300,43300,49300,55300,
+                  61300,67300,73300,79300,85300,91300,97300,103300,109300,115300];
+
+function bossHpPct() {
+  const lvl   = playerLevel;
+  const xp    = (mapData && mapData.total_xp) || 0;
+  const start = LEVEL_XP[lvl - 1] || 0;
+  const end   = LEVEL_XP[lvl];
+  if (!end) return 0;
+  const progress = Math.min(1, (xp - start) / (end - start));
+  return Math.max(0, Math.round((1 - progress) * 100));
+}
+
 /* ═══════════════════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════════════════ */
@@ -1701,22 +1714,26 @@ function getQuestsForRegion(regionId) {
 }
 
 function renderBossSection(region) {
-  const boss = getBossForRegion(region.id);
+  const regionBosses = (mapData && mapData.regionBosses || []).filter(b => b.region === region.id);
   let html = `<p class="drawer-section-label">Boss</p>`;
 
-  if (!boss) {
+  if (!regionBosses.length) {
     html += `<div class="boss-card"><p class="boss-status-none">No boss in this region.</p></div>`;
     return html;
   }
 
+  const activeBoss   = regionBosses.find(b => b.status === 'active');
+  const displayBoss  = activeBoss || regionBosses[regionBosses.length - 1];
+
   let statusHtml = '';
-  if (boss.status === 'completed') {
+  if (displayBoss.status === 'defeated') {
     statusHtml = `<p class="boss-status-done">&#x2714; DEFEATED</p>`;
-  } else if (boss.status === 'active') {
+  } else if (displayBoss.status === 'active') {
+    const hp = bossHpPct();
     statusHtml = `
       <p class="boss-status-active">&#x2718; Engaged — Active Hunt</p>
       <div class="hp-bar-wrap">
-        <div class="hp-bar-fill" style="width:65%"></div>
+        <div class="hp-bar-fill" style="width:${hp}%"></div>
       </div>`;
   } else {
     statusHtml = `<p class="boss-status-notstarted">&#x26A0; Not yet encountered</p>`;
@@ -1724,7 +1741,8 @@ function renderBossSection(region) {
 
   html += `
     <div class="boss-card">
-      <p class="boss-name">${escHtml(boss.name)}</p>
+      <p class="boss-name">${escHtml(displayBoss.name)}</p>
+      <p style="font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:6px">${escHtml(displayBoss.subtitle)}</p>
       ${statusHtml}
     </div>`;
   return html;
