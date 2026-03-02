@@ -1091,6 +1091,11 @@ canvas#particles {
     <div class="lvlup-top">LEVEL UP</div>
     <div class="lvlup-num" id="lvlup-num">2</div>
     <div class="lvlup-title-reveal" id="lvlup-title"></div>
+    <div id="lvlup-boss" style="display:none;margin-top:20px;padding:16px 20px;border:1px solid #b03020;background:rgba(176,48,32,0.08);">
+      <div style="font-size:9px;letter-spacing:4px;color:#ff5544;margin-bottom:8px;">BOSS DEFEATED</div>
+      <div id="lvlup-boss-name" style="font-size:15px;letter-spacing:2px;color:#ddd8cc;margin-bottom:4px;"></div>
+      <div id="lvlup-boss-sub" style="font-family:'IM Fell English',serif;font-style:italic;font-size:12px;color:#5a5040;"></div>
+    </div>
     <div class="lvlup-unlocks" id="lvlup-unlocks"></div>
     <button class="lvlup-dismiss" onclick="dismissLevelUp()">Continue →</button>
   </div>
@@ -1619,7 +1624,7 @@ async function markDailyQuest(questId, status) {
     state.dailyQuests[questId] = { status, xp: data.xpAwarded };
     renderAll();
     const newLevel = getLevelNum(state.totalXP);
-    if (newLevel > prevLevel) setTimeout(() => showLevelUp(newLevel), 600);
+    if (newLevel > prevLevel) setTimeout(() => showLevelUp(newLevel, data.defeatedBoss), 600);
   } catch (e) {
     console.error('Failed to mark quest', e);
   }
@@ -1629,7 +1634,7 @@ async function markDailyQuest(questId, status) {
 // LEVEL UP OVERLAY
 // ══════════════════════════════════════════
 
-function showLevelUp(newLevel) {
+function showLevelUp(newLevel, defeatedBoss) {
   const lvlData = LEVELS.find(l => l.level === newLevel) || LEVELS[newLevel - 1];
   document.getElementById('lvlup-num').textContent = newLevel;
   document.getElementById('lvlup-title').textContent = lvlData ? lvlData.title : '';
@@ -1637,6 +1642,15 @@ function showLevelUp(newLevel) {
   const newClass = CLASSES.find(c => c.unlockLevel === newLevel);
   const msg = newClass ? `⚔ Class unlocked: ${newClass.name}` : '';
   document.getElementById('lvlup-unlocks').textContent = msg;
+
+  const bossEl = document.getElementById('lvlup-boss');
+  if (defeatedBoss) {
+    document.getElementById('lvlup-boss-name').textContent = defeatedBoss.name;
+    document.getElementById('lvlup-boss-sub').textContent  = defeatedBoss.subtitle;
+    bossEl.style.display = '';
+  } else {
+    bossEl.style.display = 'none';
+  }
 
   document.getElementById('lvlup-overlay').classList.add('show');
   spawnLevelUpParticles();

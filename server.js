@@ -558,16 +558,33 @@ app.post('/api/daily-quests', requireLogin, (req, res) => {
     ).run(uid, questId, status, today, xpDelta);
   }
 
+  let defeatedBoss = null;
+
   if (xpDelta !== 0) {
+    const oldGs = db.prepare('SELECT total_xp FROM game_state WHERE user_id = ?').get(uid);
+    const oldLevel = xpToLevel(oldGs.total_xp);
     db.prepare('UPDATE game_state SET total_xp = MAX(0, total_xp + ?) WHERE user_id = ?').run(xpDelta, uid);
     const label = xpDelta > 0 ? `Daily: ${cfg.name}` : `Penalty: ${cfg.name}`;
     db.prepare('INSERT INTO xp_log (user_id, date, note, xp) VALUES (?, ?, ?, ?)').run(uid, logDate, label, xpDelta);
     db.prepare('DELETE FROM xp_log WHERE user_id = ? AND id NOT IN (SELECT id FROM xp_log WHERE user_id = ? ORDER BY id DESC LIMIT 50)').run(uid, uid);
+
+    const newGs = db.prepare('SELECT total_xp FROM game_state WHERE user_id = ?').get(uid);
+    const newLevel = xpToLevel(newGs.total_xp);
+    if (newLevel > oldLevel) {
+      for (let lvl = oldLevel; lvl < newLevel; lvl++) {
+        const boss = db.prepare('SELECT * FROM region_bosses WHERE user_id = ? AND level_req = ?').get(uid, lvl);
+        if (boss) {
+          db.prepare("UPDATE region_bosses SET status = 'defeated' WHERE user_id = ? AND level_req = ?").run(uid, lvl);
+          if (!defeatedBoss) defeatedBoss = { name: boss.name, subtitle: boss.subtitle };
+        }
+        db.prepare("UPDATE region_bosses SET status = 'active' WHERE user_id = ? AND level_req = ?").run(uid, lvl + 1);
+      }
+    }
   }
 
   const gs  = db.prepare('SELECT total_xp FROM game_state WHERE user_id = ?').get(uid);
   const log = db.prepare('SELECT date, note, xp FROM xp_log WHERE user_id = ? ORDER BY id DESC LIMIT 50').all(uid);
-  res.json({ totalXP: gs.total_xp, stats: computeStats(uid), log, xpAwarded: xpDelta });
+  res.json({ totalXP: gs.total_xp, stats: computeStats(uid), log, xpAwarded: xpDelta, defeatedBoss });
 });
 
 // GET /api/quests
