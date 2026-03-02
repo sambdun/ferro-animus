@@ -224,8 +224,9 @@ function initDb() {
       db.prepare("UPDATE users SET password_hash = ? WHERE username = 'Sam'").run(hash);
       console.log('Password reset for Sam');
     } else {
-      db.prepare("INSERT INTO users (username, password_hash, is_admin) VALUES ('Sam', ?, 1)").run(hash);
-      console.log('Sam user created');
+      const result = db.prepare("INSERT INTO users (username, password_hash, is_admin) VALUES ('Sam', ?, 1)").run(hash);
+      seedUserData(Number(result.lastInsertRowid));
+      console.log('Sam user created and seeded');
     }
   }
 
