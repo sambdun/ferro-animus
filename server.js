@@ -102,6 +102,9 @@ app.get('/register', (req, res) => {
   if (req.session.userId) return res.redirect('/');
   res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
+app.get('/welcome', requireLoginPage, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'welcome.html'));
+});
 
 // Static files (images, css, etc. — NOT html pages, those are handled above)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -425,7 +428,7 @@ app.post('/api/register', async (req, res) => {
   req.session.username = username;
   req.session.isAdmin  = isAdmin === 1;
 
-  res.json({ ok: true, redirect: '/' });
+  res.json({ ok: true, redirect: '/welcome' });
 });
 
 app.post('/api/login', async (req, res) => {
