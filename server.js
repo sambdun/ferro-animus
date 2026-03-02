@@ -559,10 +559,12 @@ app.post('/api/daily-quests', requireLogin, (req, res) => {
   }
 
   let defeatedBoss = null;
+  const unlocks = [];
 
   if (xpDelta !== 0) {
     const oldGs = db.prepare('SELECT total_xp FROM game_state WHERE user_id = ?').get(uid);
     const oldLevel = xpToLevel(oldGs.total_xp);
+    const oldXp = oldGs.total_xp;
     db.prepare('UPDATE game_state SET total_xp = MAX(0, total_xp + ?) WHERE user_id = ?').run(xpDelta, uid);
     const label = xpDelta > 0 ? `Daily: ${cfg.name}` : `Penalty: ${cfg.name}`;
     db.prepare('INSERT INTO xp_log (user_id, date, note, xp) VALUES (?, ?, ?, ?)').run(uid, logDate, label, xpDelta);
@@ -570,21 +572,41 @@ app.post('/api/daily-quests', requireLogin, (req, res) => {
 
     const newGs = db.prepare('SELECT total_xp FROM game_state WHERE user_id = ?').get(uid);
     const newLevel = xpToLevel(newGs.total_xp);
+    const newXp = newGs.total_xp;
+
     if (newLevel > oldLevel) {
       for (let lvl = oldLevel; lvl < newLevel; lvl++) {
+        // Defeat current boss
         const boss = db.prepare('SELECT * FROM region_bosses WHERE user_id = ? AND level_req = ?').get(uid, lvl);
         if (boss) {
           db.prepare("UPDATE region_bosses SET status = 'defeated' WHERE user_id = ? AND level_req = ?").run(uid, lvl);
           if (!defeatedBoss) defeatedBoss = { name: boss.name, subtitle: boss.subtitle };
         }
-        db.prepare("UPDATE region_bosses SET status = 'active' WHERE user_id = ? AND level_req = ?").run(uid, lvl + 1);
+        // Unlock next boss
+        const nextBoss = db.prepare('SELECT * FROM region_bosses WHERE user_id = ? AND level_req = ?').get(uid, lvl + 1);
+        if (nextBoss) {
+          db.prepare("UPDATE region_bosses SET status = 'active' WHERE user_id = ? AND level_req = ?").run(uid, lvl + 1);
+          unlocks.push({ type: 'boss', name: nextBoss.name, subtitle: nextBoss.subtitle });
+        }
+        // Gear unlocked by level
+        const newGear = db.prepare('SELECT * FROM map_gear WHERE unlock_lvl = ?').all(lvl + 1);
+        newGear.forEach(g => unlocks.push({ type: 'gear', name: g.name, gearType: g.type }));
+      }
+    }
+
+    // Gear unlocked by XP threshold (weapon-ashen unlocks at 3650 XP)
+    const GEAR_XP_THRESHOLDS = { 1: 3650 };
+    for (const [gearId, threshold] of Object.entries(GEAR_XP_THRESHOLDS)) {
+      if (oldXp < threshold && newXp >= threshold) {
+        const g = db.prepare('SELECT * FROM map_gear WHERE id = ?').get(Number(gearId));
+        if (g) unlocks.push({ type: 'gear', name: g.name, gearType: g.type });
       }
     }
   }
 
   const gs  = db.prepare('SELECT total_xp FROM game_state WHERE user_id = ?').get(uid);
   const log = db.prepare('SELECT date, note, xp FROM xp_log WHERE user_id = ? ORDER BY id DESC LIMIT 50').all(uid);
-  res.json({ totalXP: gs.total_xp, stats: computeStats(uid), log, xpAwarded: xpDelta, defeatedBoss });
+  res.json({ totalXP: gs.total_xp, stats: computeStats(uid), log, xpAwarded: xpDelta, defeatedBoss, unlocks });
 });
 
 // GET /api/quests

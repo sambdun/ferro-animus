@@ -507,6 +507,56 @@ canvas#particles {
 .lvlup-dismiss:hover { border-color:var(--gold-dim); color:var(--gold); }
 .lvlup-unlocks { margin-top:20px; font-size:11px; color:var(--green-glow); letter-spacing:2px; min-height:20px; }
 
+/* ── UNLOCK NOTIFICATION ── */
+#unlock-overlay {
+  position:fixed; inset:0; z-index:99;
+  background:rgba(0,0,0,.82);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .35s;
+}
+#unlock-overlay.show { opacity:1; pointer-events:all; }
+.unlock-box {
+  text-align:center;
+  border:1px solid var(--gold-dim);
+  background:linear-gradient(135deg,#0a0a18,#15130a);
+  padding:44px 64px;
+  max-width:440px;
+  width:90%;
+  position:relative;
+}
+.unlock-box::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 50%,rgba(201,168,76,.06),transparent 70%);
+}
+.unlock-tag {
+  font-size:9px; letter-spacing:5px;
+  color:var(--text-dim); margin-bottom:14px;
+}
+.unlock-tag.type-boss  { color:#ff5544; }
+.unlock-tag.type-gear  { color:var(--gold); }
+.unlock-icon { font-size:42px; display:block; margin-bottom:16px; }
+.unlock-name {
+  font-family:'Cinzel',serif;
+  font-size:18px; letter-spacing:3px;
+  color:var(--gold-light);
+  margin-bottom:6px;
+}
+.unlock-sub {
+  font-family:'IM Fell English',serif;
+  font-style:italic; font-size:13px;
+  color:var(--text-mid); margin-bottom:28px;
+}
+.unlock-dismiss {
+  font-size:9px; letter-spacing:4px; color:var(--text-dim);
+  border:1px solid var(--border);
+  padding:10px 24px;
+  cursor:pointer; background:transparent;
+  font-family:'Cinzel',serif;
+  transition:all .2s;
+}
+.unlock-dismiss:hover { border-color:var(--gold-dim); color:var(--gold); }
+
 /* ── XP LOG ── */
 .xp-log { max-height:120px; overflow-y:auto; }
 .xp-log::-webkit-scrollbar { width:4px; }
@@ -1101,6 +1151,16 @@ canvas#particles {
   </div>
 </div>
 
+<div id="unlock-overlay" onclick="nextUnlock()">
+  <div class="unlock-box" onclick="event.stopPropagation()">
+    <div class="unlock-tag" id="unlock-tag"></div>
+    <span class="unlock-icon" id="unlock-icon"></span>
+    <div class="unlock-name" id="unlock-name"></div>
+    <div class="unlock-sub"  id="unlock-sub"></div>
+    <button class="unlock-dismiss" onclick="nextUnlock()">Continue →</button>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════
 // GAME DATA
@@ -1625,6 +1685,7 @@ async function markDailyQuest(questId, status) {
     renderAll();
     const newLevel = getLevelNum(state.totalXP);
     if (newLevel > prevLevel) setTimeout(() => showLevelUp(newLevel, data.defeatedBoss), 600);
+    if (data.unlocks && data.unlocks.length) setTimeout(() => queueUnlocks(data.unlocks), newLevel > prevLevel ? 3000 : 600);
   } catch (e) {
     console.error('Failed to mark quest', e);
   }
@@ -1633,6 +1694,35 @@ async function markDailyQuest(questId, status) {
 // ══════════════════════════════════════════
 // LEVEL UP OVERLAY
 // ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// UNLOCK NOTIFICATION QUEUE
+// ══════════════════════════════════════════
+let unlockQueue = [];
+
+function queueUnlocks(unlocks) {
+  if (!unlocks || !unlocks.length) return;
+  unlockQueue = unlockQueue.concat(unlocks);
+  if (unlockQueue.length === unlocks.length) showNextUnlock();
+}
+
+function showNextUnlock() {
+  if (!unlockQueue.length) return;
+  const u = unlockQueue[0];
+  const isBoss = u.type === 'boss';
+  document.getElementById('unlock-tag').textContent  = isBoss ? '⚔ NEW BOSS AWAKENED' : '🛡 GEAR UNLOCKED';
+  document.getElementById('unlock-tag').className    = `unlock-tag type-${u.type}`;
+  document.getElementById('unlock-icon').textContent = isBoss ? '💀' : '⚔';
+  document.getElementById('unlock-name').textContent = u.name;
+  document.getElementById('unlock-sub').textContent  = u.subtitle || (u.gearType ? u.gearType.toUpperCase() : '');
+  document.getElementById('unlock-overlay').classList.add('show');
+}
+
+function nextUnlock() {
+  unlockQueue.shift();
+  document.getElementById('unlock-overlay').classList.remove('show');
+  if (unlockQueue.length) setTimeout(showNextUnlock, 300);
+}
 
 function showLevelUp(newLevel, defeatedBoss) {
   const lvlData = LEVELS.find(l => l.level === newLevel) || LEVELS[newLevel - 1];
