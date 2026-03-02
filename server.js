@@ -219,8 +219,14 @@ function initDb() {
   // One-time password reset via env var (remove RESET_PW after use)
   if (process.env.RESET_PW) {
     const hash = require('bcrypt').hashSync(process.env.RESET_PW, 12);
-    db.prepare("UPDATE users SET password_hash = ? WHERE username = 'Sam'").run(hash);
-    console.log('Password reset for Sam');
+    const samUser = db.prepare("SELECT id FROM users WHERE username = 'Sam'").get();
+    if (samUser) {
+      db.prepare("UPDATE users SET password_hash = ? WHERE username = 'Sam'").run(hash);
+      console.log('Password reset for Sam');
+    } else {
+      db.prepare("INSERT INTO users (username, password_hash, is_admin) VALUES ('Sam', ?, 1)").run(hash);
+      console.log('Sam user created');
+    }
   }
 
   // Migrations: update map_gear CHECK constraint to allow 'plate' type
