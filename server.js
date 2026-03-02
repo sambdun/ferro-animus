@@ -222,6 +222,9 @@ function initDb() {
     const samUser = db.prepare("SELECT id FROM users WHERE username = 'Sam'").get();
     if (samUser) {
       db.prepare("UPDATE users SET password_hash = ? WHERE username = 'Sam'").run(hash);
+      // Seed game data if missing (e.g. user was created without seeding)
+      const gs = db.prepare('SELECT id FROM game_state WHERE user_id = ?').get(samUser.id);
+      if (!gs) seedUserData(Number(samUser.id));
       console.log('Password reset for Sam');
     } else {
       const result = db.prepare("INSERT INTO users (username, password_hash, is_admin) VALUES ('Sam', ?, 1)").run(hash);
