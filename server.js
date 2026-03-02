@@ -163,7 +163,7 @@ function initDb() {
     CREATE TABLE IF NOT EXISTS map_gear (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       region     TEXT NOT NULL,
-      type       TEXT NOT NULL CHECK(type IN ('weapon','armour')),
+      type       TEXT NOT NULL CHECK(type IN ('weapon','armour','plate')),
       name       TEXT NOT NULL,
       unlock_lvl INTEGER NOT NULL
     );
@@ -214,6 +214,19 @@ function initDb() {
     ];
     const insertGear = db.prepare('INSERT INTO map_gear (region, type, name, unlock_lvl) VALUES (?, ?, ?, ?)');
     gearSeeds.forEach(g => insertGear.run(g.region, g.type, g.name, g.unlock_lvl));
+  }
+
+  // One-time password reset via env var (remove RESET_PW after use)
+  if (process.env.RESET_PW) {
+    const hash = require('bcrypt').hashSync(process.env.RESET_PW, 12);
+    db.prepare("UPDATE users SET password_hash = ? WHERE username = 'Sam'").run(hash);
+    console.log('Password reset for Sam');
+  }
+
+  // Migrations: add new gear items if not already present
+  const ruinwalker = db.prepare("SELECT id FROM map_gear WHERE name = 'Ruinwalker''s Plate'").get();
+  if (!ruinwalker) {
+    db.prepare('INSERT INTO map_gear (region, type, name, unlock_lvl) VALUES (?, ?, ?, ?)').run('ashen', 'plate', "Ruinwalker's Plate", 3);
   }
 }
 
