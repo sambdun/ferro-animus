@@ -223,6 +223,23 @@ function initDb() {
     console.log('Password reset for Sam');
   }
 
+  // Migrations: update map_gear CHECK constraint to allow 'plate' type
+  const gearTableSql = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='map_gear'").get();
+  if (gearTableSql && gearTableSql.sql && !gearTableSql.sql.includes("'plate'")) {
+    db.exec(`
+      CREATE TABLE map_gear_new (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        region     TEXT NOT NULL,
+        type       TEXT NOT NULL CHECK(type IN ('weapon','armour','plate')),
+        name       TEXT NOT NULL,
+        unlock_lvl INTEGER NOT NULL
+      );
+      INSERT INTO map_gear_new SELECT * FROM map_gear;
+      DROP TABLE map_gear;
+      ALTER TABLE map_gear_new RENAME TO map_gear;
+    `);
+  }
+
   // Migrations: add new gear items if not already present
   const ruinwalker = db.prepare("SELECT id FROM map_gear WHERE name = 'Ruinwalker''s Plate'").get();
   if (!ruinwalker) {
