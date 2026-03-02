@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferro Animus — Community</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c878;
+  --gold-dim: #5a3e14;
+  --gold-mid: #8a6828;
+  --bg-deep: #060504;
+  --bg-dark: #0c0a08;
+  --bg-panel: #111009;
+  --bg-panel2: #16130e;
+  --border: #2e2720;
+  --text: #ddd8cc;
+  --text-mid: #9a8e78;
+  --text-dim: #5a5040;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+/* NAV */
+#nav-menu { position: fixed; top: 20px; left: 24px; z-index: 10; }
+#nav-btn {
+  background: rgba(6,5,4,0.9); border: 1px solid var(--gold-dim);
+  color: var(--gold); font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: 3px; padding: 8px 14px; cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+#nav-dd {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  background: rgba(6,5,4,0.97); border: 1px solid var(--gold-dim);
+  min-width: 190px; backdrop-filter: blur(8px);
+}
+.nav-link {
+  display: block; padding: 10px 16px;
+  font-size: 10px; letter-spacing: 2px; color: var(--text-mid);
+  text-decoration: none; transition: color .2s, background .2s;
+}
+.nav-link:hover { color: var(--gold); background: rgba(201,168,76,.06); }
+
+/* PAGE */
+.page-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 80px 24px 60px;
+}
+
+.page-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 22px;
+  letter-spacing: 5px;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 6px;
+  text-shadow: 0 0 30px rgba(201,168,76,0.3);
+}
+
+.page-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 2px;
+  margin-bottom: 40px;
+}
+
+.hero-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: border-color .2s;
+}
+.hero-card:hover { border-color: var(--gold-dim); }
+.hero-card.rank-1 { border-color: var(--gold-dim); }
+
+.hero-rank {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  min-width: 28px;
+  text-align: center;
+}
+.hero-card.rank-1 .hero-rank { color: var(--gold); }
+
+.hero-info { flex: 1; min-width: 0; }
+
+.hero-name {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.hero-card.rank-1 .hero-name { color: var(--gold-light); }
+
+.hero-class {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.xp-bar-wrap {
+  background: rgba(6,5,4,0.8);
+  border: 1px solid var(--border);
+  height: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.xp-bar-fill {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim) 0%, var(--gold) 60%, var(--gold-light) 100%);
+  transition: width 0.8s ease;
+}
+
+.hero-level {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  white-space: nowrap;
+  border: 1px solid var(--gold-dim);
+  padding: 4px 10px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 0;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* Credit */
+.credit {
+  position: fixed; bottom: 10px; right: 14px;
+  font-family: serif; font-size: 10px; letter-spacing: 2px;
+  color: rgba(180,160,100,0.5); pointer-events: none; z-index: 9999;
+  border: 1px solid rgba(180,160,100,0.25); padding: 4px 8px;
+}
+</style>
+</head>
+<body>
+
+<div id="nav-menu">
+  <button id="nav-btn" onclick="toggleNav()">☰ MENU</button>
+  <div id="nav-dd">
+    <a href="/" class="nav-link" style="border-bottom:1px solid var(--border);">⚔ Dashboard</a>
+    <a href="/map" class="nav-link">🗺 World Map</a>
+    <a href="/ashen" class="nav-link" style="border-top:1px solid var(--border);">🏚 The Ashen City</a>
+    <a href="/story" class="nav-link" style="border-top:1px solid var(--border);">📜 The Chronicle</a>
+    <a href="/library" class="nav-link" style="border-top:1px solid var(--border);">📚 The Library</a>
+    <a href="/community" class="nav-link" style="border-top:1px solid var(--border);">⚔ Community</a>
+    <a id="admin-nav-link" href="/admin" class="nav-link" style="display:none;border-top:1px solid var(--border);">⚙ Admin</a>
+    <button onclick="logout()" class="nav-link" style="border-top:1px solid var(--border);background:none;border-left:none;border-right:none;border-bottom:none;border-radius:0;text-align:left;width:100%;cursor:pointer;">↩ Logout</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <div class="page-title">COMMUNITY</div>
+  <div class="page-sub">The Warriors of Ferro Animus</div>
+  <div class="hero-list" id="hero-list">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<div class="credit">Created by Samuel B. Dunlap</div>
+
+<script>
+const LEVEL_XP = [0,7300,13300,19300,25300,31300,37300,43300,49300,55300,61300,67300,73300,79300,85300,91300,97300,103300,109300,115300];
+
+const CLASSES = [
+  { num:1,  name:"Unawakened",       unlockLevel:1  },
+  { num:2,  name:"Challenger",       unlockLevel:2  },
+  { num:3,  name:"Ashborn",          unlockLevel:3  },
+  { num:4,  name:"The Iron Pilgrim", unlockLevel:5  },
+  { num:5,  name:"Last Ember",       unlockLevel:7  },
+  { num:6,  name:"Crimson Hunter",   unlockLevel:9  },
+  { num:7,  name:"Hollow King",      unlockLevel:10 },
+  { num:8,  name:"The Dead Calm",    unlockLevel:12 },
+  { num:9,  name:"Canopy Ghost",     unlockLevel:14 },
+  { num:10, name:"The Eye of Ruin",  unlockLevel:15 },
+  { num:11, name:"The Void Storm",   unlockLevel:16 },
+  { num:12, name:"Shadow Monarch",   unlockLevel:18 },
+  { num:13, name:"The Undying",      unlockLevel:20 },
+];
+
+function xpToLevel(xp) {
+  let lvl = 1;
+  for (let i = 0; i < LEVEL_XP.length; i++) {
+    if (xp >= LEVEL_XP[i]) lvl = i + 1;
+  }
+  return Math.min(lvl, 20);
+}
+
+function getClass(level) {
+  let cls = CLASSES[0];
+  for (const c of CLASSES) {
+    if (level >= c.unlockLevel) cls = c;
+  }
+  return cls;
+}
+
+function xpProgress(xp, level) {
+  if (level >= 20) return 100;
+  const start = LEVEL_XP[level - 1];
+  const end   = LEVEL_XP[level];
+  return Math.round(((xp - start) / (end - start)) * 100);
+}
+
+function toggleNav() {
+  const dd = document.getElementById('nav-dd');
+  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('nav-menu').contains(e.target)) {
+    document.getElementById('nav-dd').style.display = 'none';
+  }
+});
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+async function load() {
+  const res  = await fetch('/api/community');
+  const data = await res.json();
+  const el   = document.getElementById('hero-list');
+
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state">No heroes yet. Be the first.</div>';
+    return;
+  }
+
+  el.innerHTML = data.map((u, i) => {
+    const level   = xpToLevel(u.total_xp);
+    const cls     = getClass(level);
+    const pct     = xpProgress(u.total_xp, level);
+    const rankNum = i + 1;
+    return `
+      <div class="hero-card ${rankNum === 1 ? 'rank-1' : ''}">
+        <div class="hero-rank">#${rankNum}</div>
+        <div class="hero-info">
+          <div class="hero-name">${u.username.toUpperCase()}</div>
+          <div class="hero-class">${cls.name}</div>
+          <div class="xp-bar-wrap">
+            <div class="xp-bar-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <div class="hero-level">LVL ${level}</div>
+      </div>`;
+  }).join('');
+}
+
+load();
+</script>
+</body>
+</html>

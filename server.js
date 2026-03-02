@@ -105,6 +105,9 @@ app.get('/register', (req, res) => {
 app.get('/welcome', requireLoginPage, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'welcome.html'));
 });
+app.get('/community', requireLoginPage, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'community.html'));
+});
 
 // Static files (images, css, etc. — NOT html pages, those are handled above)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -633,6 +636,16 @@ app.post('/api/reset', requireLogin, (req, res) => {
 });
 
 // ── Map routes ────────────────────────────────────────────────────────────────
+
+app.get('/api/community', requireLogin, (req, res) => {
+  const users = db.prepare(`
+    SELECT u.username, COALESCE(g.total_xp, 0) as total_xp
+    FROM users u
+    LEFT JOIN game_state g ON g.user_id = u.id
+    ORDER BY total_xp DESC
+  `).all();
+  res.json(users);
+});
 
 app.get('/api/map', requireLogin, (req, res) => {
   const uid          = req.session.userId;
