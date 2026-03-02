@@ -169,7 +169,7 @@ function initDb() {
     CREATE TABLE IF NOT EXISTS map_gear (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       region     TEXT NOT NULL,
-      type       TEXT NOT NULL CHECK(type IN ('weapon','armour','plate')),
+      type       TEXT NOT NULL CHECK(type IN ('weapon','armour','plate','helm')),
       name       TEXT NOT NULL,
       unlock_lvl INTEGER NOT NULL
     );
@@ -239,14 +239,14 @@ function initDb() {
     }
   }
 
-  // Migrations: update map_gear CHECK constraint to allow 'plate' type
+  // Migrations: update map_gear CHECK constraint to allow 'plate' and 'helm' types
   const gearTableSql = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='map_gear'").get();
-  if (gearTableSql && gearTableSql.sql && !gearTableSql.sql.includes("'plate'")) {
+  if (gearTableSql && gearTableSql.sql && !gearTableSql.sql.includes("'helm'")) {
     db.exec(`
       CREATE TABLE map_gear_new (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
         region     TEXT NOT NULL,
-        type       TEXT NOT NULL CHECK(type IN ('weapon','armour','plate')),
+        type       TEXT NOT NULL CHECK(type IN ('weapon','armour','plate','helm')),
         name       TEXT NOT NULL,
         unlock_lvl INTEGER NOT NULL
       );
@@ -260,6 +260,10 @@ function initDb() {
   const ruinwalker = db.prepare("SELECT id FROM map_gear WHERE name = 'Ruinwalker''s Plate'").get();
   if (!ruinwalker) {
     db.prepare('INSERT INTO map_gear (region, type, name, unlock_lvl) VALUES (?, ?, ?, ?)').run('ashen', 'plate', "Ruinwalker's Plate", 3);
+  }
+  const ashburnHelm = db.prepare("SELECT id FROM map_gear WHERE name = 'Ashburn Helm'").get();
+  if (!ashburnHelm) {
+    db.prepare('INSERT INTO map_gear (region, type, name, unlock_lvl) VALUES (?, ?, ?, ?)').run('ashen', 'helm', 'Ashburn Helm', 4);
   }
 }
 
